@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { categories, cards, Category, Card } from './data/cards';
 import Vector from '../imports/Vector-3-98';
 import { motion, AnimatePresence } from 'motion/react';
-import backgroundImage from 'figma:asset/0974afced7065c64475ed50b1325532f486c7bd6.png';
+import backgroundImage from '../assets/0974afced7065c64475ed50b1325532f486c7bd6.png';
 
 type Screen = 
   | { type: 'start' }
