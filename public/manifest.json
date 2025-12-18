@@ -1,12 +1,16 @@
 {
   "name": "Pausenknopf",
   "short_name": "Pausenknopf",
-  "description": "Für Momente, die viel sind",
+  "description": "Für Momente, die viel sind. Atemübungen, Regulierungstechniken und Unterstützung im Moment.",
   "start_url": "/pausenknopf/",
+  "scope": "/pausenknopf/",
   "display": "standalone",
   "background_color": "#FDF7F3",
   "theme_color": "#000000",
   "orientation": "portrait",
+  "categories": ["lifestyle", "health", "wellness"],
+  "lang": "de",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/pausenknopf/icon-192.png",
@@ -19,6 +23,26 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/pausenknopf/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Zufällige Karte",
+      "short_name": "Zufällig",
+      "description": "Zeige mir eine zufällige Karte",
+      "url": "/pausenknopf/#random",
+      "icons": [
+        {
+          "src": "/pausenknopf/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

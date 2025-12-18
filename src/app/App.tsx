@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { categories, cards, Category, Card } from './data/cards';
 import Vector from '../imports/Vector-3-98';
 import { motion, AnimatePresence } from 'motion/react';
-import backgroundImage from '../assets/0974afced7065c64475ed50b1325532f486c7bd6.png';
+import backgroundImage from '../assets/background-optimized.jpg';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { MotionProvider, useMotion } from './context/MotionContext';
 
 type Screen = 
   | { type: 'start' }
@@ -75,11 +77,15 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF7F3]">
-      <AnimatePresence mode="wait">
-        {renderScreen()}
-      </AnimatePresence>
-    </div>
+    <ErrorBoundary>
+      <MotionProvider>
+        <div className="min-h-screen bg-[#FDF7F3]" role="application" aria-label="Pausenknopf App">
+          <AnimatePresence mode="wait">
+            {renderScreen()}
+          </AnimatePresence>
+        </div>
+      </MotionProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -93,12 +99,13 @@ function StartScreen({
   onDatenschutz: () => void;
 }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col items-center justify-center px-8 py-12 relative overflow-hidden"
+      role="main"
     >
       {/* Background Image */}
       <div 
@@ -153,17 +160,17 @@ function StartScreen({
         transition={{ delay: 0.8, duration: 0.6 }}
         className="absolute bottom-6 left-0 right-0 px-8"
       >
-        <div className="max-w-md mx-auto flex justify-center gap-4 text-xs text-neutral-400">
-          <button 
+        <div className="max-w-md mx-auto flex justify-center gap-4 text-xs text-neutral-600">
+          <button
             onClick={onImpressum}
-            className="hover:text-neutral-600 transition-colors"
+            className="hover:text-neutral-800 transition-colors"
           >
             Impressum
           </button>
           <span>·</span>
-          <button 
+          <button
             onClick={onDatenschutz}
-            className="hover:text-neutral-600 transition-colors"
+            className="hover:text-neutral-800 transition-colors"
           >
             Datenschutz
           </button>
@@ -199,13 +206,13 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-3 text-center"
         >
-          <h2 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Was brauchst du gerade?</h2>
+          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Was brauchst du gerade?</h1>
         </motion.div>
 
         <motion.button
@@ -245,7 +252,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
                 >
                   {category.keyword}
                 </h3>
-                <p className="text-sm text-neutral-800 leading-snug opacity-80" style={{ letterSpacing: '0.01em' }}>
+                <p className="text-sm text-neutral-900 leading-snug" style={{ letterSpacing: '0.01em' }}>
                   {category.shortDescription}
                 </p>
               </div>
@@ -269,17 +276,17 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
         transition={{ delay: 0.8, duration: 0.6 }}
         className="w-full pb-4"
       >
-        <div className="max-w-md mx-auto flex justify-center gap-3 text-[10px] text-neutral-300">
-          <button 
+        <div className="max-w-md mx-auto flex justify-center gap-3 text-xs text-neutral-500">
+          <button
             onClick={onImpressum}
-            className="hover:text-neutral-500 transition-colors"
+            className="hover:text-neutral-700 transition-colors"
           >
             Impressum
           </button>
           <span>·</span>
-          <button 
+          <button
             onClick={onDatenschutz}
-            className="hover:text-neutral-500 transition-colors"
+            className="hover:text-neutral-700 transition-colors"
           >
             Datenschutz
           </button>
@@ -289,19 +296,33 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
   );
 }
 
-function CategoryScreen({ 
-  categoryId, 
-  onSelectCard, 
-  onBack 
-}: { 
-  categoryId: string; 
+function CategoryScreen({
+  categoryId,
+  onSelectCard,
+  onBack
+}: {
+  categoryId: string;
   onSelectCard: (cardId: string) => void;
   onBack: () => void;
 }) {
   const category = categories.find(c => c.id === categoryId);
   const categoryCards = cards.filter(c => c.categoryId === categoryId);
 
-  if (!category) return null;
+  if (!category) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-8">
+        <div className="text-center space-y-4">
+          <p className="text-neutral-600">Kategorie nicht gefunden</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Zurück
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -371,7 +392,21 @@ function CardDetailScreen({ cardId, onBack }: { cardId: string; onBack: () => vo
   const card = cards.find(c => c.id === cardId);
   const category = card ? categories.find(c => c.id === card.categoryId) : null;
 
-  if (!card || !category) return null;
+  if (!card || !category) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-8">
+        <div className="text-center space-y-4">
+          <p className="text-neutral-600">Karte nicht gefunden</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Zurück
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 

@@ -3,7 +3,7 @@ import svgPaths from "./svg-o09trc8360";
 export default function Vector() {
   return (
     <div className="relative size-full" data-name="Vector">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 201 201">
+      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 201 201" role="img" aria-label="Pausenknopf Logo">
         <g id="Vector">
           <path d={svgPaths.p3eff3b80} fill="#E4DAD3" />
           <path d={svgPaths.p2cee0370} fill="#FBF0E9" />
