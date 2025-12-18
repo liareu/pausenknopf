@@ -136,7 +136,7 @@ function StartScreen({
           className="space-y-4 text-[rgb(0,0,0)] text-[20px]"
         >
           <p className="text-black leading-relaxed" style={{ letterSpacing: '0.01em' }}>
-            Für Momente, die viel sind
+            Für Momente, die gerade viel sind
           </p>
         </motion.div>
         
@@ -242,7 +242,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
               className={`${category.colorClass} rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center`}
               aria-label={`Kategorie ${category.name} auswählen`}
             >
-              <div className="space-y-2 w-full">
+              <div className="space-y-2 w-full text-center flex flex-col items-center justify-center h-full">
                 <h3
                   className="text-xl font-serif text-neutral-900"
                   style={{
@@ -255,6 +255,13 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
                 <p className="text-sm text-neutral-900 leading-snug" style={{ letterSpacing: '0.01em' }}>
                   {category.shortDescription}
                 </p>
+                <div className="flex flex-wrap gap-1.5 justify-center mt-3">
+                  {category.badgeLabels.map((badge) => (
+                    <span key={badge} className="text-xs text-neutral-900 opacity-70 px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm">
+                      {badge}
+                    </span>
+                  ))}
+                </div>
               </div>
             </motion.button>
           ))}
@@ -348,7 +355,7 @@ function CategoryScreen({
           >
             ← Zurück
           </motion.button>
-          <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.replace('Koralle', '').replace('Beige', '').replace('Rosa', '').replace('Orange', '').replace('Blau', '').replace('Grün', '').replace(/^[\s–-]+/, '').trim()}</p>
+          <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
           <h2 className="text-4xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
           <p className="opacity-90 leading-relaxed">{category.description}</p>
         </div>
@@ -432,7 +439,7 @@ function CardDetailScreen({ cardId, onBack }: { cardId: string; onBack: () => vo
           >
             ← Zurück
           </motion.button>
-          <p className="text-white text-sm opacity-90">{category.label}</p>
+          <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
         </div>
       </motion.div>
 
