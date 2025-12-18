@@ -232,13 +232,13 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
               whileHover={{ scale: 1.03, y: -4 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onSelectCategory(category.id)}
-              className={`${category.colorClass} rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center p-6 text-center`}
+              className={`${category.colorClass} rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center`}
               aria-label={`Kategorie ${category.name} auswählen`}
             >
-              <div className="space-y-2">
-                <h3 
-                  className="text-xl font-serif text-neutral-900" 
-                  style={{ 
+              <div className="space-y-2 w-full">
+                <h3
+                  className="text-xl font-serif text-neutral-900"
+                  style={{
                     fontFamily: 'Rufina, serif',
                     letterSpacing: '0.02em'
                   }}
