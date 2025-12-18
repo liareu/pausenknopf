@@ -1,0 +1,24 @@
+{
+  "name": "Pausenknopf",
+  "short_name": "Pausenknopf",
+  "description": "Für Momente, die viel sind",
+  "start_url": "/pausenknopf/",
+  "display": "standalone",
+  "background_color": "#FDF7F3",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/pausenknopf/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pausenknopf/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
