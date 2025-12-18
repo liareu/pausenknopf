@@ -6,7 +6,7 @@ import backgroundImage from '../assets/background-optimized.jpg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
 
-type Screen = 
+type Screen =
   | { type: 'start' }
   | { type: 'orientation' }
   | { type: 'category'; categoryId: string }
@@ -30,8 +30,8 @@ export default function App() {
         );
       case 'orientation':
         return (
-          <OrientationScreen 
-            key="orientation" 
+          <OrientationScreen
+            key="orientation"
             onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
             onImpressum={() => setScreen({ type: 'impressum' })}
@@ -49,7 +49,7 @@ export default function App() {
         );
       case 'card':
         return (
-          <CardDetailScreen 
+          <CardDetailScreen
             key={`card-${screen.cardId}`}
             cardId={screen.cardId}
             onBack={() => {
@@ -242,9 +242,9 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
               className={`${category.colorClass} rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center`}
               aria-label={`Kategorie ${category.name} auswählen`}
             >
-              <div className="space-y-2 w-full text-center flex flex-col items-center justify-center h-full">
+              <div className="space-y-2 w-full text-center flex flex-col items-center justify-center px-2">
                 <h3
-                  className="text-xl font-serif text-neutral-900"
+                  className="text-xl font-serif text-neutral-900 break-words"
                   style={{
                     fontFamily: 'Rufina, serif',
                     letterSpacing: '0.02em'
@@ -252,12 +252,12 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
                 >
                   {category.keyword}
                 </h3>
-                <p className="text-sm text-neutral-900 leading-snug" style={{ letterSpacing: '0.01em' }}>
+                <p className="text-sm text-neutral-900 leading-snug break-words" style={{ letterSpacing: '0.01em' }}>
                   {category.shortDescription}
                 </p>
-                <div className="flex flex-wrap gap-1.5 justify-center mt-3">
+                <div className="flex flex-wrap gap-1.5 justify-center mt-3 w-full">
                   {category.badgeLabels.map((badge) => (
-                    <span key={badge} className="text-xs text-neutral-900 opacity-70 px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm">
+                    <span key={badge} className="text-xs text-neutral-900 opacity-70 px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm break-words">
                       {badge}
                     </span>
                   ))}
@@ -267,22 +267,19 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onImpressum, onDate
           ))}
         </div>
 
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          className="text-center pt-6 pb-8"
-        >
-          <p className="text-xs text-[rgb(0,0,0)] text-[14px] font-bold">Du darfst ausprobieren.</p>
-        </motion.div>
       </div>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.6 }}
-        className="w-full pb-4"
+        className="w-full pb-4 space-y-3 pt-8"
       >
+        <div className="max-w-md mx-auto text-center">
+          <p className="text-xs text-black font-bold uppercase font-serif" style={{ fontFamily: 'Rufina, serif', letterSpacing: '0.01em' }}>
+            mit liebe entwickelt von Julia Reuter für dich {'<3'}
+          </p>
+        </div>
         <div className="max-w-md mx-auto flex justify-center gap-3 text-xs text-neutral-500">
           <button
             onClick={onImpressum}
@@ -445,17 +442,19 @@ function CardDetailScreen({ cardId, onBack }: { cardId: string; onBack: () => vo
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 py-12">
         <div className="max-w-md w-full space-y-8">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-2xl text-center"
-            style={{ letterSpacing: '0.02em' }}
-          >
-            {card.title}
-          </motion.h2>
-          
-          <motion.div 
+          <div className="space-y-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-2xl text-center"
+              style={{ letterSpacing: '0.02em' }}
+            >
+              {card.title}
+            </motion.h2>
+          </div>
+
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}

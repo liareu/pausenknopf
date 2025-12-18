@@ -7,6 +7,7 @@ export type Category = {
   label: string;
   keyword: string;
   shortDescription: string;
+  badgeLabels: string[];
 };
 
 export type Card = {
@@ -26,7 +27,8 @@ export const categories: Category[] = [
     description: 'Diese Karten helfen dir, wieder runterzufahren.',
     label: 'Blau – Runterfahren & Atmung',
     keyword: 'Runterfahren',
-    shortDescription: 'wenn alles zu viel ist'
+    shortDescription: 'wenn alles zu viel ist',
+    badgeLabels: ['Atmung', 'Beruhigung', 'Achtsamkeit']
   },
   {
     id: 'orange',
@@ -36,7 +38,8 @@ export const categories: Category[] = [
     description: 'Diese Karten helfen dir, Energie zu regulieren.',
     label: 'Orange – Aktive Regulation',
     keyword: 'Regulieren',
-    shortDescription: 'wenn du zu viel Energie hast'
+    shortDescription: 'wenn du zu viel Energie hast',
+    badgeLabels: ['Regulation', 'Energie', 'Bewegung']
   },
   {
     id: 'koralle',
@@ -46,7 +49,8 @@ export const categories: Category[] = [
     description: 'Diese Karten helfen dir, Spannung durch Bewegung loszulassen.',
     label: 'Koralle – Körper aktivieren',
     keyword: 'Aktivieren',
-    shortDescription: 'wenn du Spannung loslassen willst'
+    shortDescription: 'wenn du Spannung loslassen willst',
+    badgeLabels: ['Bewegung', 'Spannung', 'Aktivität']
   },
   {
     id: 'gruen',
@@ -56,7 +60,8 @@ export const categories: Category[] = [
     description: 'Diese Karten helfen dir, wieder im Körper anzukommen.',
     label: 'Grün – Körper & Erdung',
     keyword: 'Erdung',
-    shortDescription: 'wenn du zurückkommen möchtest'
+    shortDescription: 'wenn du zurückkommen möchtest',
+    badgeLabels: ['Körper', 'Präsenz', 'Erdung']
   },
   {
     id: 'rosa',
@@ -66,7 +71,8 @@ export const categories: Category[] = [
     description: 'Diese Karten helfen dir, innere Sicherheit zu finden.',
     label: 'Rosa – Ruhe & innere Sicherheit',
     keyword: 'Sicherheit',
-    shortDescription: 'wenn du Schutz brauchst'
+    shortDescription: 'wenn du Schutz brauchst',
+    badgeLabels: ['Ruhe', 'Schutz', 'Geborgenheit']
   },
   {
     id: 'beige',
@@ -76,7 +82,8 @@ export const categories: Category[] = [
     description: 'Diese Karten sind da, um dich zu halten.',
     label: 'Beige – Zweifel & Erschöpfung',
     keyword: 'Halten',
-    shortDescription: 'wenn du nicht mehr kannst'
+    shortDescription: 'wenn du nicht mehr kannst',
+    badgeLabels: ['Mitgefühl', 'Halt', 'Selbstmitgefühl']
   }
 ];
 
@@ -137,7 +144,78 @@ Dein Körper weiß,
 wie Loslassen geht.`,
     hashtags: ['spannung', 'durchatmen', 'loslassen']
   },
-  
+
+  // ORANGE - Aktive Regulation
+  {
+    id: 'orange-1',
+    categoryId: 'orange',
+    title: 'Schütteln',
+    text: `Stell dich hin.
+
+Schüttel deine Hände.
+Dann Arme, Schultern, Beine.
+
+Es darf albern aussehen.
+
+Dein Körper lässt Spannung los.`,
+    hashtags: ['unruhe', 'energie_zu_viel', 'dampf_raus']
+  },
+  {
+    id: 'orange-2',
+    categoryId: 'orange',
+    title: 'Kraft spüren',
+    text: `Drück deine Hände fest gegeneinander.
+
+Halt die Spannung.
+
+Lass los.
+
+Du hast Kraft.
+Auch jetzt.`,
+    hashtags: ['spannung', 'kraft', 'ich_kann']
+  },
+  {
+    id: 'orange-3',
+    categoryId: 'orange',
+    title: 'Wand',
+    text: `Stell dich vor eine Wand.
+
+Drück deine Hände dagegen.
+
+Spür deinen Körper.
+
+Du bist stabiler,
+als es sich gerade anfühlt.`,
+    hashtags: ['halt_im_körper', 'stabilität', 'runterkommen']
+  },
+  {
+    id: 'orange-4',
+    categoryId: 'orange',
+    title: 'Gehen',
+    text: `Geh langsam ein paar Schritte.
+
+Spür jeden Fuß.
+
+Links.
+Rechts.
+
+Du bist hier.`,
+    hashtags: ['getrieben', 'bewegung', 'jetzt']
+  },
+  {
+    id: 'orange-5',
+    categoryId: 'orange',
+    title: 'Druck & Loslassen',
+    text: `Ball deine Hände zu Fäusten.
+
+Halt kurz.
+
+Öffne sie wieder.
+
+Dein Körper darf loslassen.`,
+    hashtags: ['spannung', 'entladen', 'körperarbeit']
+  },
+
   // KORALLE - Körper aktivieren
   {
     id: 'koralle-1',

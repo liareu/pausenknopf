@@ -1,7 +1,7 @@
 {
   "name": "Pausenknopf",
   "short_name": "Pausenknopf",
-  "description": "Für Momente, die viel sind. Atemübungen, Regulierungstechniken und Unterstützung im Moment.",
+  "description": "Für Momente, die gerade viel sind. Atemübungen, Regulierungstechniken und Unterstützung im Moment.",
   "start_url": "/pausenknopf/",
   "scope": "/pausenknopf/",
   "display": "standalone",
