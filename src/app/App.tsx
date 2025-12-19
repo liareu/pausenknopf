@@ -510,7 +510,7 @@ function CategoryScreen({
               className="flex items-center justify-center"
               aria-label="Zurück zur Startseite"
             >
-              <img src={logoSvg} alt="Pausenknopf Logo" className="w-12 h-12" />
+              <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
           <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
@@ -642,7 +642,7 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
               className="flex items-center justify-center"
               aria-label="Zurück zur Startseite"
             >
-              <img src={logoSvg} alt="Pausenknopf Logo" className="w-12 h-12" />
+              <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
           <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
@@ -1158,7 +1158,7 @@ function RecoveryDetailScreen({
               className="flex items-center justify-center"
               aria-label="Zurück zur Startseite"
             >
-              <img src={logoSvg} alt="Pausenknopf Logo" className="w-12 h-12" />
+              <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
           <h2 className="text-3xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
