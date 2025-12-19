@@ -19,7 +19,7 @@ function BottomNav({
 }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 flex justify-center">
-      <div className="bg-[#FDF7F3] rounded-2xl shadow-lg border border-neutral-200/50">
+      <div className="bg-[#FDF7F3] rounded-full shadow-lg border border-neutral-200/50">
         <div className="flex p-2 gap-2 items-center">
           <button
             onClick={() => onTabChange('exercises')}
