@@ -6,19 +6,21 @@ import backgroundStart from '../assets/background-start.jpg';
 import logoSvg from '../assets/logo.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
-import { Sparkles, Battery } from 'lucide-react';
+import { Sparkles, BatteryMedium, Home } from 'lucide-react';
 
 function BottomNav({
   currentTab,
-  onTabChange
+  onTabChange,
+  onHome
 }: {
   currentTab: 'exercises' | 'recovery';
   onTabChange: (tab: 'exercises' | 'recovery') => void;
+  onHome: () => void;
 }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
       <div className="max-w-md mx-auto bg-[#FDF7F3] rounded-2xl shadow-lg border border-neutral-200/50">
-        <div className="flex p-2 gap-2 justify-center">
+        <div className="flex p-2 gap-2 justify-center items-center">
           <button
             onClick={() => onTabChange('exercises')}
             className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
@@ -31,6 +33,13 @@ function BottomNav({
             <Sparkles size={24} />
           </button>
           <button
+            onClick={onHome}
+            className="w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none bg-black text-white hover:bg-neutral-800 shadow-md"
+            aria-label="Zur Startseite"
+          >
+            <Home size={24} />
+          </button>
+          <button
             onClick={() => onTabChange('recovery')}
             className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
               currentTab === 'recovery'
@@ -39,7 +48,7 @@ function BottomNav({
             }`}
             aria-label="Was fehlt mir?"
           >
-            <Battery size={24} />
+            <BatteryMedium size={24} />
           </button>
         </div>
       </div>
@@ -230,6 +239,7 @@ export default function App() {
             <BottomNav
               currentTab={isExercisesFlow ? 'exercises' : 'recovery'}
               onTabChange={handleTabChange}
+              onHome={navigateHome}
             />
           )}
         </div>
