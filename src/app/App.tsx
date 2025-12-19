@@ -23,10 +23,10 @@ function BottomNav({
         <div className="flex p-2 gap-2 items-center">
           <button
             onClick={() => onTabChange('exercises')}
-            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
+            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:bg-neutral-100/50 ${
               currentTab === 'exercises'
-                ? 'bg-[#6B9BD1] text-white font-medium shadow-sm'
-                : 'text-neutral-700 hover:bg-neutral-100/50'
+                ? 'text-[#6B9BD1]'
+                : 'text-neutral-400'
             }`}
             aria-label="Was hilft jetzt?"
           >
@@ -41,10 +41,10 @@ function BottomNav({
           </button>
           <button
             onClick={() => onTabChange('recovery')}
-            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
+            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:bg-neutral-100/50 ${
               currentTab === 'recovery'
-                ? 'bg-[#D4A5A5] text-white font-medium shadow-sm'
-                : 'text-neutral-700 hover:bg-neutral-100/50'
+                ? 'text-[#D4A5A5]'
+                : 'text-neutral-400'
             }`}
             aria-label="Was fehlt mir?"
           >
