@@ -15,28 +15,32 @@ function BottomNav({
   onTabChange: (tab: 'exercises' | 'recovery') => void;
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50">
-      <div className="max-w-md mx-auto flex">
-        <button
-          onClick={() => onTabChange('exercises')}
-          className={`flex-1 py-4 px-6 text-center transition-all ${
-            currentTab === 'exercises'
-              ? 'bg-[#6B9BD1] text-white font-medium'
-              : 'text-neutral-600 hover:bg-neutral-50'
-          }`}
-        >
-          Was hilft jetzt?
-        </button>
-        <button
-          onClick={() => onTabChange('recovery')}
-          className={`flex-1 py-4 px-6 text-center transition-all ${
-            currentTab === 'recovery'
-              ? 'bg-[#D4A5A5] text-white font-medium'
-              : 'text-neutral-600 hover:bg-neutral-50'
-          }`}
-        >
-          Was fehlt mir?
-        </button>
+    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
+      <div className="max-w-md mx-auto bg-[#FDF7F3] rounded-2xl shadow-lg border border-neutral-200/50">
+        <div className="flex p-2 gap-2">
+          <button
+            onClick={() => onTabChange('exercises')}
+            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl ${
+              currentTab === 'exercises'
+                ? 'bg-[#6B9BD1] text-white font-medium shadow-sm'
+                : 'text-neutral-700 hover:bg-neutral-100/50'
+            }`}
+            style={{ letterSpacing: '0.01em' }}
+          >
+            Was hilft jetzt?
+          </button>
+          <button
+            onClick={() => onTabChange('recovery')}
+            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl ${
+              currentTab === 'recovery'
+                ? 'bg-[#D4A5A5] text-white font-medium shadow-sm'
+                : 'text-neutral-700 hover:bg-neutral-100/50'
+            }`}
+            style={{ letterSpacing: '0.01em' }}
+          >
+            Was fehlt mir?
+          </button>
+        </div>
       </div>
     </div>
   );
