@@ -6,6 +6,7 @@ import backgroundStart from '../assets/background-start.jpg';
 import logoSvg from '../assets/logo.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
+import { Sparkles, Battery } from 'lucide-react';
 
 function BottomNav({
   currentTab,
@@ -20,25 +21,25 @@ function BottomNav({
         <div className="flex p-2 gap-2">
           <button
             onClick={() => onTabChange('exercises')}
-            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl outline-none focus:outline-none ${
+            className={`flex-1 py-4 px-4 flex items-center justify-center transition-all rounded-xl outline-none focus:outline-none ${
               currentTab === 'exercises'
                 ? 'bg-[#6B9BD1] text-white font-medium shadow-sm'
                 : 'text-neutral-700 hover:bg-neutral-100/50'
             }`}
-            style={{ letterSpacing: '0.01em' }}
+            aria-label="Was hilft jetzt?"
           >
-            Was hilft jetzt?
+            <Sparkles size={24} />
           </button>
           <button
             onClick={() => onTabChange('recovery')}
-            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl outline-none focus:outline-none ${
+            className={`flex-1 py-4 px-4 flex items-center justify-center transition-all rounded-xl outline-none focus:outline-none ${
               currentTab === 'recovery'
                 ? 'bg-[#D4A5A5] text-white font-medium shadow-sm'
                 : 'text-neutral-700 hover:bg-neutral-100/50'
             }`}
-            style={{ letterSpacing: '0.01em' }}
+            aria-label="Was fehlt mir?"
           >
-            Was fehlt mir?
+            <Battery size={24} />
           </button>
         </div>
       </div>
