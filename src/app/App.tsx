@@ -703,7 +703,7 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
             className="w-full py-4 px-6 bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 transition-colors rounded-lg font-medium"
             aria-label="Noch eine zufällige Karte anzeigen"
           >
-            🎲 Noch eine zufällige Karte
+            Noch eine zufällige Karte
           </motion.button>
 
           <motion.button
