@@ -38,7 +38,7 @@ function BottomNav({
             className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:opacity-80 shadow-md"
             aria-label="Zur Startseite"
           >
-            <img src={knopfSvg} alt="Home" className="w-full h-full" />
+            <img src={knopfSvg} alt="Home" className="w-12 h-12" />
           </button>
           <button
             onClick={() => onTabChange('recovery')}
