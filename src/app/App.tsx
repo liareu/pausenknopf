@@ -7,6 +7,30 @@ import logoSvg from '../assets/logo.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
 
+function Breadcrumb({ items, onNavigate }: { items: { label: string; onClick?: () => void }[]; onNavigate?: (index: number) => void }) {
+  return (
+    <div className="flex items-center gap-2 text-sm text-neutral-600 mb-4">
+      {items.map((item, index) => (
+        <div key={index} className="flex items-center gap-2">
+          {item.onClick ? (
+            <button
+              onClick={item.onClick}
+              className="hover:text-neutral-800 transition-colors"
+            >
+              {item.label}
+            </button>
+          ) : (
+            <span className={index === items.length - 1 ? 'text-neutral-800 font-medium' : ''}>
+              {item.label}
+            </span>
+          )}
+          {index < items.length - 1 && <span>›</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 type Screen =
   | { type: 'start' }
   | { type: 'orientation' }
@@ -73,6 +97,7 @@ export default function App() {
             key={`recovery-${screen.recoveryId}`}
             recoveryId={screen.recoveryId}
             onBack={() => setScreen({ type: 'recovery-types' })}
+            onStartQuestionnaire={() => setScreen({ type: 'questionnaire' })}
             onHome={navigateHome}
             onImpressum={() => navigateTo({ type: 'impressum' })}
             onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
@@ -520,6 +545,12 @@ function CategoryScreen({
       </motion.div>
 
       <div className="max-w-md mx-auto px-6 py-8 space-y-4 relative z-10">
+        <Breadcrumb
+          items={[
+            { label: 'Übungen', onClick: onBack },
+            { label: category.name }
+          ]}
+        />
         {categoryCards.map((card, index) => (
           <motion.button
             key={card.id}
@@ -649,8 +680,15 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
         </div>
       </motion.div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative z-10">
         <div className="max-w-md w-full space-y-8">
+          <Breadcrumb
+            items={[
+              { label: 'Übungen', onClick: () => { const card = cards.find(c => c.id === cardId); if (card) onBack(); } },
+              { label: category.name, onClick: onBack },
+              { label: card.title }
+            ]}
+          />
           <div className="space-y-4">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -1091,12 +1129,14 @@ function RecoveryTypesScreen({
 function RecoveryDetailScreen({
   recoveryId,
   onBack,
+  onStartQuestionnaire,
   onHome,
   onImpressum,
   onDatenschutz
 }: {
   recoveryId: string;
   onBack: () => void;
+  onStartQuestionnaire: () => void;
   onHome: () => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
@@ -1165,7 +1205,13 @@ function RecoveryDetailScreen({
         </div>
       </motion.div>
 
-      <div className="flex-1 max-w-md mx-auto px-6 py-8 space-y-8">
+      <div className="flex-1 max-w-md mx-auto px-6 py-8 space-y-8 relative z-10">
+        <Breadcrumb
+          items={[
+            { label: 'Erholung', onClick: onBack },
+            { label: recovery.name }
+          ]}
+        />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1201,7 +1247,17 @@ function RecoveryDetailScreen({
         transition={{ delay: 0.6, duration: 0.5 }}
         className="px-6 py-6 relative z-10"
       >
-        <div className="max-w-md mx-auto space-y-6">
+        <div className="max-w-md mx-auto space-y-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onStartQuestionnaire}
+            className="w-full py-4 px-6 bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 transition-colors rounded-lg font-medium"
+            aria-label="Fragebogen starten"
+          >
+            Unsicher? Mach den Fragebogen
+          </motion.button>
+
           <motion.button
             whileHover={{ x: -4 }}
             whileTap={{ scale: 0.95 }}
