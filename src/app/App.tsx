@@ -639,7 +639,7 @@ function CardDetailScreen({ cardId, onBack, onImpressum, onDatenschutz }: { card
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="px-6 py-6"
+        className="px-6 py-6 relative z-10"
       >
         <div className="max-w-md mx-auto space-y-6">
           <motion.button
@@ -1114,7 +1114,7 @@ function RecoveryDetailScreen({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}
-        className="px-6 py-6"
+        className="px-6 py-6 relative z-10"
       >
         <div className="max-w-md mx-auto space-y-6">
           <motion.button
