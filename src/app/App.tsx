@@ -615,7 +615,7 @@ function CardDetailScreen({ cardId, onBack, onImpressum, onDatenschutz }: { card
             transition={{ delay: 0.4, duration: 0.8 }}
             className="space-y-4"
           >
-            <p className="whitespace-pre-line leading-loose text-neutral-700" style={{ letterSpacing: '0.01em' }}>
+            <p className="text-lg whitespace-pre-line leading-loose text-neutral-700" style={{ letterSpacing: '0.01em' }}>
               {card.text}
             </p>
           </motion.div>
