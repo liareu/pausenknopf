@@ -3,7 +3,7 @@
 :root {
   --font-size: 16px;
   --font-family-heading: 'Rufina', serif;
-  --font-family-body: 'Mulish', sans-serif;
+  --font-family-body: 'Red Hat Display', sans-serif;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -124,6 +124,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: var(--font-family-body);
   }
 
   body {
@@ -180,12 +181,14 @@
   }
 
   button {
+    font-family: var(--font-family-body);
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   input {
+    font-family: var(--font-family-body);
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;

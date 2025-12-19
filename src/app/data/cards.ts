@@ -18,6 +18,17 @@ export type Card = {
   hashtags: string[];
 };
 
+export type RecoveryType = {
+  id: string;
+  name: string;
+  title: string;
+  color: string;
+  colorClass: string;
+  shortDescription: string;
+  signs: string[];
+  helps: string[];
+};
+
 export const categories: Category[] = [
   {
     id: 'blau',
@@ -469,5 +480,71 @@ Nicht, weil du kämpfst,
 sondern weil nichts bleibt,
 wie es ist.`,
     hashtags: ['zweifel', 'hoffnung', 'es_verändert_sich']
+  }
+];
+
+export const recoveryTypes: RecoveryType[] = [
+  {
+    id: 'koerperlich',
+    name: 'Körperliche Erholung',
+    title: 'Wenn dein Körper nicht mehr kann ...',
+    color: '#6B9BD1',
+    colorClass: 'bg-[#6B9BD1]',
+    shortDescription: 'wenn du erschöpft bist',
+    signs: [
+      'schwere Müdigkeit',
+      'Verspannungen/Kopfschmerzen',
+      'schwaches Immunsystem',
+      'Appetit-/Libidoverlust',
+      'Magen-Darm-Beschwerden'
+    ],
+    helps: [
+      'ausschlafen',
+      'Wärme/Wellness',
+      'leichte Bewegung (Yoga, Dehnen, Spazieren)',
+      'ausruhen'
+    ]
+  },
+  {
+    id: 'mental',
+    name: 'Mentale Erholung',
+    title: 'Wenn dein Kopf überläuft ...',
+    color: '#E8C66C',
+    colorClass: 'bg-[#E8C66C]',
+    shortDescription: 'wenn du nicht mehr denken kannst',
+    signs: [
+      'Konzentrationsprobleme',
+      'Reizbarkeit',
+      'Vergesslichkeit',
+      'Gedankenchaos'
+    ],
+    helps: [
+      'bildschirmfreie Zeit',
+      'Mini-Pausen',
+      'Spaziergänge',
+      'Gedanken sortieren (z. B. Listen schreiben)',
+      'Aufgaben abgeben'
+    ]
+  },
+  {
+    id: 'emotional',
+    name: 'Emotionale Erholung',
+    title: 'Wenn dein Herz müde ist ...',
+    color: '#A5C4D4',
+    colorClass: 'bg-[#A5C4D4]',
+    shortDescription: 'wenn du nichts mehr fühlst',
+    signs: [
+      'emotionale Leere',
+      'wenig Freude',
+      'schnelle Erschöpfung',
+      'Rückzug'
+    ],
+    helps: [
+      'Gefühle zulassen',
+      'darüber sprechen',
+      'weinen',
+      'Selfcare & Journaling',
+      'dich fragen: "Was brauche ich?"'
+    ]
   }
 ];
