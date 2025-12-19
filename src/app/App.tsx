@@ -18,10 +18,10 @@ function BottomNav({
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
       <div className="max-w-md mx-auto bg-[#FDF7F3] rounded-2xl shadow-lg border border-neutral-200/50">
-        <div className="flex p-2 gap-2">
+        <div className="flex p-2 gap-2 justify-center">
           <button
             onClick={() => onTabChange('exercises')}
-            className={`flex-1 py-4 px-4 flex items-center justify-center transition-all rounded-xl outline-none focus:outline-none ${
+            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
               currentTab === 'exercises'
                 ? 'bg-[#6B9BD1] text-white font-medium shadow-sm'
                 : 'text-neutral-700 hover:bg-neutral-100/50'
@@ -32,7 +32,7 @@ function BottomNav({
           </button>
           <button
             onClick={() => onTabChange('recovery')}
-            className={`flex-1 py-4 px-4 flex items-center justify-center transition-all rounded-xl outline-none focus:outline-none ${
+            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
               currentTab === 'recovery'
                 ? 'bg-[#D4A5A5] text-white font-medium shadow-sm'
                 : 'text-neutral-700 hover:bg-neutral-100/50'
