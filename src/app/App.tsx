@@ -6,7 +6,7 @@ import backgroundStart from '../assets/background-start.jpg';
 import logoSvg from '../assets/logo.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
-import { Sparkles, BatteryMedium, Home } from 'lucide-react';
+import { Sparkles, BatteryMedium, Home, Shuffle } from 'lucide-react';
 
 function BottomNav({
   currentTab,
@@ -387,34 +387,6 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onImpressum
         }}
       />
       <div className="max-w-md w-full mx-auto space-y-4 flex-1 relative z-10">
-        <div className="space-y-3">
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onHome}
-            className="text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors"
-            aria-label="Zurück zur Startseite"
-          >
-            ← Zurück
-          </motion.button>
-
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onHome}
-            className="flex justify-center mx-auto"
-            aria-label="Zurück zur Startseite"
-          >
-            <img src={logoSvg} alt="Pausenknopf Logo" className="w-28 h-28" />
-          </motion.button>
-        </div>
-
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -478,34 +450,6 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onImpressum
         </div>
 
       </div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="w-full pb-4 space-y-3 pt-8"
-      >
-        <div className="max-w-md mx-auto text-center">
-          <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-            mit liebe entwickelt von Julia Reuter für dich {'<3'}
-          </p>
-        </div>
-        <div className="max-w-md mx-auto flex justify-center gap-3 text-xs text-neutral-500">
-          <button
-            onClick={onImpressum}
-            className="hover:text-neutral-700 transition-colors"
-          >
-            Impressum
-          </button>
-          <span>·</span>
-          <button
-            onClick={onDatenschutz}
-            className="hover:text-neutral-700 transition-colors"
-          >
-            Datenschutz
-          </button>
-        </div>
-      </motion.div>
     </motion.div>
   );
 }
@@ -566,26 +510,6 @@ function CategoryScreen({
         className={`${category.colorClass} text-white px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <div className="flex items-center justify-between">
-            <motion.button
-              whileHover={{ x: -4 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onBack}
-              className="text-white hover:opacity-70 active:opacity-50 transition-opacity"
-              aria-label="Zurück zur Orientierung"
-            >
-              ← Zurück
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onHome}
-              className="flex items-center justify-center"
-              aria-label="Zurück zur Startseite"
-            >
-              <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
-            </motion.button>
-          </div>
           <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
           <h2 className="text-4xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
           <p className="opacity-90 leading-relaxed">{category.description}</p>
@@ -608,49 +532,6 @@ function CategoryScreen({
             <h3 className="text-lg" style={{ letterSpacing: '0.01em' }}>{card.title}</h3>
           </motion.button>
         ))}
-
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          whileHover={{ x: -4 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onBack}
-          className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors mt-8"
-          aria-label="Zurück zur Orientierung"
-        >
-          ← Zurück
-        </motion.button>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="w-full pb-4 space-y-3 pt-8"
-        >
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="text-center">
-              <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-                mit liebe entwickelt von Julia Reuter für dich {'<3'}
-              </p>
-            </div>
-            <div className="flex justify-center gap-3 text-xs text-neutral-500">
-              <button
-                onClick={onImpressum}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Impressum
-              </button>
-              <span>·</span>
-              <button
-                onClick={onDatenschutz}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Datenschutz
-              </button>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </motion.div>
   );
@@ -698,26 +579,6 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
         className={`${category.colorClass} px-6 py-6 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-2">
-          <div className="flex items-center justify-between">
-            <motion.button
-              whileHover={{ x: -4 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onBack}
-              className="text-white hover:opacity-70 active:opacity-50 transition-opacity"
-              aria-label="Zurück zur Kategorie"
-            >
-              ← Zurück
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onHome}
-              className="flex items-center justify-center"
-              aria-label="Zurück zur Startseite"
-            >
-              <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
-            </motion.button>
-          </div>
           <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
         </div>
       </motion.div>
@@ -766,59 +627,17 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="px-6 py-6 pb-24 relative z-10"
+        className="px-6 py-6 pb-24 relative z-10 flex justify-center"
       >
-        <div className="max-w-md mx-auto space-y-4">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onRandomCard}
-            className="w-full py-4 px-6 bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 transition-colors rounded-lg font-medium"
-            aria-label="Noch eine zufällige Karte anzeigen"
-          >
-            Noch eine zufällige Karte
-          </motion.button>
-
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors"
-            aria-label="Zurück zur Kategorie"
-          >
-            ← Zurück zu den Karten
-          </motion.button>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="w-full pb-4 space-y-3"
-          >
-            <div className="max-w-md mx-auto space-y-3">
-              <div className="text-center">
-                <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-                  mit liebe entwickelt von Julia Reuter für dich {'<3'}
-                </p>
-              </div>
-              <div className="flex justify-center gap-3 text-xs text-neutral-500">
-                <button
-                  onClick={onImpressum}
-                  className="hover:text-neutral-700 transition-colors"
-                >
-                  Impressum
-                </button>
-                <span>·</span>
-                <button
-                  onClick={onDatenschutz}
-                  className="hover:text-neutral-700 transition-colors"
-                >
-                  Datenschutz
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onRandomCard}
+          className="w-12 h-12 flex items-center justify-center bg-black text-white hover:bg-neutral-800 transition-colors rounded-full outline-none focus:outline-none"
+          aria-label="Noch eine zufällige Karte anzeigen"
+        >
+          <Shuffle size={20} />
+        </motion.button>
       </motion.div>
     </motion.div>
   );
@@ -1045,34 +864,6 @@ function RecoveryTypesScreen({
         }}
       />
       <div className="max-w-md w-full mx-auto space-y-4 flex-1 relative z-10">
-        <div className="space-y-3">
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors"
-            aria-label="Zurück zur Startseite"
-          >
-            ← Zurück
-          </motion.button>
-
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onHome}
-            className="flex justify-center mx-auto"
-            aria-label="Zurück zur Startseite"
-          >
-            <img src={logoSvg} alt="Pausenknopf Logo" className="w-28 h-28" />
-          </motion.button>
-        </div>
-
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1126,36 +917,6 @@ function RecoveryTypesScreen({
             </motion.button>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="w-full pb-4 space-y-3 pt-8"
-        >
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="text-center">
-              <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-                mit liebe entwickelt von Julia Reuter für dich {'<3'}
-              </p>
-            </div>
-            <div className="flex justify-center gap-3 text-xs text-neutral-500">
-              <button
-                onClick={onImpressum}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Impressum
-              </button>
-              <span>·</span>
-              <button
-                onClick={onDatenschutz}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Datenschutz
-              </button>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </motion.div>
   );
@@ -1216,26 +977,6 @@ function RecoveryDetailScreen({
         className={`${recovery.colorClass} px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <div className="flex items-center justify-between">
-            <motion.button
-              whileHover={{ x: -4 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onBack}
-              className="text-white hover:opacity-70 active:opacity-50 transition-opacity"
-              aria-label="Zurück zur Übersicht"
-            >
-              ← Zurück
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onHome}
-              className="flex items-center justify-center"
-              aria-label="Zurück zur Startseite"
-            >
-              <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
-            </motion.button>
-          </div>
           <h2 className="text-3xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
         </div>
       </motion.div>
@@ -1286,46 +1027,6 @@ function RecoveryDetailScreen({
           >
             Unsicher? Mach den Fragebogen
           </motion.button>
-
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors"
-            aria-label="Zurück zur Übersicht"
-          >
-            ← Zurück zur Übersicht
-          </motion.button>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="w-full pb-4 space-y-3"
-          >
-            <div className="max-w-md mx-auto space-y-3">
-              <div className="text-center">
-                <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-                  mit liebe entwickelt von Julia Reuter für dich {'<3'}
-                </p>
-              </div>
-              <div className="flex justify-center gap-3 text-xs text-neutral-500">
-                <button
-                  onClick={onImpressum}
-                  className="hover:text-neutral-700 transition-colors"
-                >
-                  Impressum
-                </button>
-                <span>·</span>
-                <button
-                  onClick={onDatenschutz}
-                  className="hover:text-neutral-700 transition-colors"
-                >
-                  Datenschutz
-                </button>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </motion.div>
     </motion.div>
@@ -1387,15 +1088,6 @@ function QuestionnaireScreen({
           transition={{ delay: 0.1, duration: 0.5 }}
           className="space-y-4"
         >
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="text-neutral-600 hover:text-neutral-800 transition-colors"
-            aria-label="Zurück"
-          >
-            ← Zurück
-          </motion.button>
           <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Welche Anzeichen treffen auf dich zu?</h1>
           <p className="text-sm text-neutral-600" style={{ letterSpacing: '0.01em' }}>
             Wähle alle aus, die du gerade bei dir bemerkst
@@ -1452,36 +1144,6 @@ function QuestionnaireScreen({
         >
           Auswertung ({selectedSigns.length} ausgewählt)
         </motion.button>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="w-full pb-4 space-y-3 pt-8"
-        >
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="text-center">
-              <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-                mit liebe entwickelt von Julia Reuter für dich {'<3'}
-              </p>
-            </div>
-            <div className="flex justify-center gap-3 text-xs text-neutral-500">
-              <button
-                onClick={onImpressum}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Impressum
-              </button>
-              <span>·</span>
-              <button
-                onClick={onDatenschutz}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Datenschutz
-              </button>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </motion.div>
   );
@@ -1605,46 +1267,6 @@ function QuestionnaireResultScreen({
           >
             Nochmal versuchen
           </motion.button>
-
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 transition-colors"
-            aria-label="Zurück zur Übersicht"
-          >
-            ← Zurück zur Übersicht
-          </motion.button>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="w-full pb-4 space-y-3 pt-8"
-        >
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="text-center">
-              <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-                mit liebe entwickelt von Julia Reuter für dich {'<3'}
-              </p>
-            </div>
-            <div className="flex justify-center gap-3 text-xs text-neutral-500">
-              <button
-                onClick={onImpressum}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Impressum
-              </button>
-              <span>·</span>
-              <button
-                onClick={onDatenschutz}
-                className="hover:text-neutral-700 transition-colors"
-              >
-                Datenschutz
-              </button>
-            </div>
-          </div>
         </motion.div>
       </div>
     </motion.div>
