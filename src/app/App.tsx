@@ -18,9 +18,9 @@ function BottomNav({
   onHome: () => void;
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-      <div className="max-w-md mx-auto bg-[#FDF7F3] rounded-2xl shadow-lg border border-neutral-200/50">
-        <div className="flex p-2 gap-2 justify-center items-center">
+    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 flex justify-center">
+      <div className="bg-[#FDF7F3] rounded-2xl shadow-lg border border-neutral-200/50">
+        <div className="flex p-2 gap-2 items-center">
           <button
             onClick={() => onTabChange('exercises')}
             className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none ${
@@ -30,14 +30,14 @@ function BottomNav({
             }`}
             aria-label="Was hilft jetzt?"
           >
-            <Sparkles size={24} />
+            <Sparkles size={22} />
           </button>
           <button
             onClick={onHome}
-            className="w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none bg-black text-white hover:bg-neutral-800 shadow-md"
+            className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none bg-black text-white hover:bg-neutral-800 shadow-md"
             aria-label="Zur Startseite"
           >
-            <Home size={24} />
+            <Home size={26} />
           </button>
           <button
             onClick={() => onTabChange('recovery')}
@@ -48,7 +48,7 @@ function BottomNav({
             }`}
             aria-label="Was fehlt mir?"
           >
-            <BatteryMedium size={24} />
+            <BatteryMedium size={22} />
           </button>
         </div>
       </div>
