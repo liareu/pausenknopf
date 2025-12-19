@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import backgroundImage from '../assets/background-optimized.jpg';
 import backgroundStart from '../assets/background-start.jpg';
 import logoSvg from '../assets/logo.svg';
+import knopfSvg from '../assets/knopf.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
-import { Sparkles, BatteryMedium, Home, Shuffle } from 'lucide-react';
+import { Sparkles, BatteryMedium, Shuffle } from 'lucide-react';
 
 function BottomNav({
   currentTab,
@@ -34,10 +35,10 @@ function BottomNav({
           </button>
           <button
             onClick={onHome}
-            className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none bg-black text-white hover:bg-neutral-800 shadow-md"
+            className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:opacity-80 shadow-md"
             aria-label="Zur Startseite"
           >
-            <Home size={26} />
+            <img src={knopfSvg} alt="Home" className="w-full h-full" />
           </button>
           <button
             onClick={() => onTabChange('recovery')}
