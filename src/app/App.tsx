@@ -35,7 +35,7 @@ function BottomNav({
           </button>
           <button
             onClick={onHome}
-            className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:opacity-80 shadow-md border-2 border-white"
+            className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:opacity-80 shadow-md"
             aria-label="Zur Startseite"
           >
             <img src={knopfSvg} alt="Home" className="w-12 h-12" />
