@@ -21,6 +21,27 @@ type Screen =
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ type: 'start' });
+  const [screenHistory, setScreenHistory] = useState<Screen[]>([]);
+
+  const navigateTo = (newScreen: Screen) => {
+    setScreenHistory(prev => [...prev, screen]);
+    setScreen(newScreen);
+  };
+
+  const navigateBack = () => {
+    if (screenHistory.length > 0) {
+      const previousScreen = screenHistory[screenHistory.length - 1];
+      setScreen(previousScreen);
+      setScreenHistory(prev => prev.slice(0, -1));
+    } else {
+      setScreen({ type: 'start' });
+    }
+  };
+
+  const navigateHome = () => {
+    setScreenHistory([]);
+    setScreen({ type: 'start' });
+  };
 
   const renderScreen = () => {
     switch (screen.type) {
@@ -30,8 +51,8 @@ export default function App() {
             key="start"
             onExercises={() => setScreen({ type: 'orientation' })}
             onRecovery={() => setScreen({ type: 'recovery-types' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'recovery-types':
@@ -40,10 +61,10 @@ export default function App() {
             key="recovery-types"
             onSelectRecovery={(recoveryId) => setScreen({ type: 'recovery-detail', recoveryId })}
             onStartQuestionnaire={() => setScreen({ type: 'questionnaire' })}
-            onHome={() => setScreen({ type: 'start' })}
+            onHome={navigateHome}
             onBack={() => setScreen({ type: 'start' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'recovery-detail':
@@ -52,8 +73,9 @@ export default function App() {
             key={`recovery-${screen.recoveryId}`}
             recoveryId={screen.recoveryId}
             onBack={() => setScreen({ type: 'recovery-types' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onHome={navigateHome}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'questionnaire':
@@ -62,8 +84,9 @@ export default function App() {
             key="questionnaire"
             onSubmit={(selectedSigns) => setScreen({ type: 'questionnaire-result', selectedSigns })}
             onBack={() => setScreen({ type: 'recovery-types' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onHome={navigateHome}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'questionnaire-result':
@@ -74,8 +97,9 @@ export default function App() {
             onViewDetail={(recoveryId) => setScreen({ type: 'recovery-detail', recoveryId })}
             onRetry={() => setScreen({ type: 'questionnaire' })}
             onBack={() => setScreen({ type: 'recovery-types' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onHome={navigateHome}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'orientation':
@@ -84,9 +108,9 @@ export default function App() {
             key="orientation"
             onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
-            onHome={() => setScreen({ type: 'start' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onHome={navigateHome}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'category':
@@ -96,8 +120,9 @@ export default function App() {
             categoryId={screen.categoryId}
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
             onBack={() => setScreen({ type: 'orientation' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onHome={navigateHome}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'card':
@@ -111,22 +136,27 @@ export default function App() {
                 setScreen({ type: 'category', categoryId: card.categoryId });
               }
             }}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onRandomCard={() => {
+              const randomCard = cards[Math.floor(Math.random() * cards.length)];
+              setScreen({ type: 'card', cardId: randomCard.id });
+            }}
+            onHome={navigateHome}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'impressum':
-        return <ImpressumScreen key="impressum" onBack={() => setScreen({ type: 'start' })} />;
+        return <ImpressumScreen key="impressum" onBack={navigateBack} onHome={navigateHome} />;
       case 'datenschutz':
-        return <DatenschutzScreen key="datenschutz" onBack={() => setScreen({ type: 'start' })} />;
+        return <DatenschutzScreen key="datenschutz" onBack={navigateBack} onHome={navigateHome} />;
       default:
         return (
           <StartScreen
             key="start"
             onExercises={() => setScreen({ type: 'orientation' })}
             onRecovery={() => setScreen({ type: 'recovery-types' })}
-            onImpressum={() => setScreen({ type: 'impressum' })}
-            onDatenschutz={() => setScreen({ type: 'datenschutz' })}
+            onImpressum={() => navigateTo({ type: 'impressum' })}
+            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
     }
@@ -411,12 +441,14 @@ function CategoryScreen({
   categoryId,
   onSelectCard,
   onBack,
+  onHome,
   onImpressum,
   onDatenschutz
 }: {
   categoryId: string;
   onSelectCard: (cardId: string) => void;
   onBack: () => void;
+  onHome: () => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
 }) {
@@ -461,15 +493,26 @@ function CategoryScreen({
         className={`${category.colorClass} text-white px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="text-white hover:opacity-70 active:opacity-50 transition-opacity mb-4"
-            aria-label="Zurück zur Orientierung"
-          >
-            ← Zurück
-          </motion.button>
+          <div className="flex items-center justify-between">
+            <motion.button
+              whileHover={{ x: -4 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="text-white hover:opacity-70 active:opacity-50 transition-opacity"
+              aria-label="Zurück zur Orientierung"
+            >
+              ← Zurück
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onHome}
+              className="flex items-center justify-center"
+              aria-label="Zurück zur Startseite"
+            >
+              <img src={logoSvg} alt="Pausenknopf Logo" className="w-12 h-12" />
+            </motion.button>
+          </div>
           <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
           <h2 className="text-4xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
           <p className="opacity-90 leading-relaxed">{category.description}</p>
@@ -540,7 +583,7 @@ function CategoryScreen({
   );
 }
 
-function CardDetailScreen({ cardId, onBack, onImpressum, onDatenschutz }: { cardId: string; onBack: () => void; onImpressum: () => void; onDatenschutz: () => void }) {
+function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, onDatenschutz }: { cardId: string; onBack: () => void; onRandomCard: () => void; onHome: () => void; onImpressum: () => void; onDatenschutz: () => void }) {
   const card = cards.find(c => c.id === cardId);
   const category = card ? categories.find(c => c.id === card.categoryId) : null;
 
@@ -582,15 +625,26 @@ function CardDetailScreen({ cardId, onBack, onImpressum, onDatenschutz }: { card
         className={`${category.colorClass} px-6 py-6 relative z-10`}
       >
         <div className="max-w-md mx-auto">
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="text-white hover:opacity-70 active:opacity-50 transition-opacity mb-2"
-            aria-label="Zurück zur Kategorie"
-          >
-            ← Zurück
-          </motion.button>
+          <div className="flex items-center justify-between mb-2">
+            <motion.button
+              whileHover={{ x: -4 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="text-white hover:opacity-70 active:opacity-50 transition-opacity"
+              aria-label="Zurück zur Kategorie"
+            >
+              ← Zurück
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onHome}
+              className="flex items-center justify-center"
+              aria-label="Zurück zur Startseite"
+            >
+              <img src={logoSvg} alt="Pausenknopf Logo" className="w-12 h-12" />
+            </motion.button>
+          </div>
           <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
         </div>
       </motion.div>
@@ -641,7 +695,17 @@ function CardDetailScreen({ cardId, onBack, onImpressum, onDatenschutz }: { card
         transition={{ delay: 0.3, duration: 0.5 }}
         className="px-6 py-6 relative z-10"
       >
-        <div className="max-w-md mx-auto space-y-6">
+        <div className="max-w-md mx-auto space-y-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onRandomCard}
+            className="w-full py-4 px-6 bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 transition-colors rounded-lg font-medium"
+            aria-label="Noch eine zufällige Karte anzeigen"
+          >
+            🎲 Noch eine zufällige Karte
+          </motion.button>
+
           <motion.button
             whileHover={{ x: -4 }}
             whileTap={{ scale: 0.95 }}
@@ -687,7 +751,7 @@ function CardDetailScreen({ cardId, onBack, onImpressum, onDatenschutz }: { card
   );
 }
 
-function ImpressumScreen({ onBack }: { onBack: () => void }) {
+function ImpressumScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -704,14 +768,18 @@ function ImpressumScreen({ onBack }: { onBack: () => void }) {
         }}
       />
       <div className="max-w-md w-full mx-auto space-y-6 relative z-10">
-        <motion.div
+        <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="flex justify-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onHome}
+          className="flex justify-center mx-auto"
+          aria-label="Zurück zur Startseite"
         >
           <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
-        </motion.div>
+        </motion.button>
 
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
@@ -772,7 +840,7 @@ function ImpressumScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-function DatenschutzScreen({ onBack }: { onBack: () => void }) {
+function DatenschutzScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -789,14 +857,18 @@ function DatenschutzScreen({ onBack }: { onBack: () => void }) {
         }}
       />
       <div className="max-w-md w-full mx-auto space-y-6 relative z-10">
-        <motion.div
+        <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="flex justify-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onHome}
+          className="flex justify-center mx-auto"
+          aria-label="Zurück zur Startseite"
         >
           <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
-        </motion.div>
+        </motion.button>
 
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
@@ -1019,11 +1091,13 @@ function RecoveryTypesScreen({
 function RecoveryDetailScreen({
   recoveryId,
   onBack,
+  onHome,
   onImpressum,
   onDatenschutz
 }: {
   recoveryId: string;
   onBack: () => void;
+  onHome: () => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
 }) {
@@ -1067,15 +1141,26 @@ function RecoveryDetailScreen({
         className={`${recovery.colorClass} px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="text-white hover:opacity-70 active:opacity-50 transition-opacity mb-4"
-            aria-label="Zurück zur Übersicht"
-          >
-            ← Zurück
-          </motion.button>
+          <div className="flex items-center justify-between">
+            <motion.button
+              whileHover={{ x: -4 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="text-white hover:opacity-70 active:opacity-50 transition-opacity"
+              aria-label="Zurück zur Übersicht"
+            >
+              ← Zurück
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onHome}
+              className="flex items-center justify-center"
+              aria-label="Zurück zur Startseite"
+            >
+              <img src={logoSvg} alt="Pausenknopf Logo" className="w-12 h-12" />
+            </motion.button>
+          </div>
           <h2 className="text-3xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
         </div>
       </motion.div>
@@ -1165,11 +1250,13 @@ function RecoveryDetailScreen({
 function QuestionnaireScreen({
   onSubmit,
   onBack,
+  onHome,
   onImpressum,
   onDatenschutz
 }: {
   onSubmit: (selectedSigns: string[]) => void;
   onBack: () => void;
+  onHome: () => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
 }) {
@@ -1320,6 +1407,7 @@ function QuestionnaireResultScreen({
   onViewDetail,
   onRetry,
   onBack,
+  onHome,
   onImpressum,
   onDatenschutz
 }: {
@@ -1327,6 +1415,7 @@ function QuestionnaireResultScreen({
   onViewDetail: (recoveryId: string) => void;
   onRetry: () => void;
   onBack: () => void;
+  onHome: () => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
 }) {
