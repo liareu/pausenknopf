@@ -7,26 +7,37 @@ import logoSvg from '../assets/logo.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
 
-function Breadcrumb({ items, onNavigate }: { items: { label: string; onClick?: () => void }[]; onNavigate?: (index: number) => void }) {
+function BottomNav({
+  currentTab,
+  onTabChange
+}: {
+  currentTab: 'exercises' | 'recovery';
+  onTabChange: (tab: 'exercises' | 'recovery') => void;
+}) {
   return (
-    <div className="flex items-center gap-1.5 text-xs text-white/70">
-      {items.map((item, index) => (
-        <div key={index} className="flex items-center gap-1.5">
-          {item.onClick ? (
-            <button
-              onClick={item.onClick}
-              className="hover:text-white/90 transition-colors"
-            >
-              {item.label}
-            </button>
-          ) : (
-            <span className={index === items.length - 1 ? 'text-white font-medium' : ''}>
-              {item.label}
-            </span>
-          )}
-          {index < items.length - 1 && <span className="opacity-50">›</span>}
-        </div>
-      ))}
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50">
+      <div className="max-w-md mx-auto flex">
+        <button
+          onClick={() => onTabChange('exercises')}
+          className={`flex-1 py-4 px-6 text-center transition-all ${
+            currentTab === 'exercises'
+              ? 'bg-[#6B9BD1] text-white font-medium'
+              : 'text-neutral-600 hover:bg-neutral-50'
+          }`}
+        >
+          Was hilft jetzt?
+        </button>
+        <button
+          onClick={() => onTabChange('recovery')}
+          className={`flex-1 py-4 px-6 text-center transition-all ${
+            currentTab === 'recovery'
+              ? 'bg-[#D4A5A5] text-white font-medium'
+              : 'text-neutral-600 hover:bg-neutral-50'
+          }`}
+        >
+          Was fehlt mir?
+        </button>
+      </div>
     </div>
   );
 }
@@ -46,6 +57,7 @@ type Screen =
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ type: 'start' });
   const [screenHistory, setScreenHistory] = useState<Screen[]>([]);
+  const [currentTab, setCurrentTab] = useState<'exercises' | 'recovery'>('exercises');
 
   const navigateTo = (newScreen: Screen) => {
     setScreenHistory(prev => [...prev, screen]);
@@ -66,6 +78,21 @@ export default function App() {
     setScreenHistory([]);
     setScreen({ type: 'start' });
   };
+
+  const handleTabChange = (tab: 'exercises' | 'recovery') => {
+    setCurrentTab(tab);
+    setScreenHistory([]);
+    if (tab === 'exercises') {
+      setScreen({ type: 'orientation' });
+    } else {
+      setScreen({ type: 'recovery-types' });
+    }
+  };
+
+  // Determine current tab based on screen type
+  const isExercisesFlow = screen.type === 'orientation' || screen.type === 'category' || screen.type === 'card';
+  const isRecoveryFlow = screen.type === 'recovery-types' || screen.type === 'recovery-detail' || screen.type === 'questionnaire' || screen.type === 'questionnaire-result';
+  const showBottomNav = isExercisesFlow || isRecoveryFlow;
 
   const renderScreen = () => {
     switch (screen.type) {
@@ -194,6 +221,12 @@ export default function App() {
           <AnimatePresence mode="wait">
             {renderScreen()}
           </AnimatePresence>
+          {showBottomNav && (
+            <BottomNav
+              currentTab={isExercisesFlow ? 'exercises' : 'recovery'}
+              onTabChange={handleTabChange}
+            />
+          )}
         </div>
       </MotionProvider>
     </ErrorBoundary>
@@ -329,7 +362,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onImpressum
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -538,19 +571,13 @@ function CategoryScreen({
               <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
-          <Breadcrumb
-            items={[
-              { label: 'Übungen', onClick: onBack },
-              { label: category.name }
-            ]}
-          />
           <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
           <h2 className="text-4xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
           <p className="opacity-90 leading-relaxed">{category.description}</p>
         </div>
       </motion.div>
 
-      <div className="max-w-md mx-auto px-6 py-8 space-y-4 relative z-10">
+      <div className="max-w-md mx-auto px-6 py-8 pb-24 space-y-4 relative z-10">
         {categoryCards.map((card, index) => (
           <motion.button
             key={card.id}
@@ -676,13 +703,6 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
               <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
-          <Breadcrumb
-            items={[
-              { label: 'Übungen', onClick: () => { const card = cards.find(c => c.id === cardId); if (card) onBack(); } },
-              { label: category.name, onClick: onBack },
-              { label: card.title }
-            ]}
-          />
           <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
         </div>
       </motion.div>
@@ -731,7 +751,7 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="px-6 py-6 relative z-10"
+        className="px-6 py-6 pb-24 relative z-10"
       >
         <div className="max-w-md mx-auto space-y-4">
           <motion.button
@@ -1000,7 +1020,7 @@ function RecoveryTypesScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -1201,12 +1221,6 @@ function RecoveryDetailScreen({
               <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
-          <Breadcrumb
-            items={[
-              { label: 'Erholung', onClick: onBack },
-              { label: recovery.name }
-            ]}
-          />
           <h2 className="text-3xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
         </div>
       </motion.div>
@@ -1245,7 +1259,7 @@ function RecoveryDetailScreen({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}
-        className="px-6 py-6 relative z-10"
+        className="px-6 py-6 pb-24 relative z-10"
       >
         <div className="max-w-md mx-auto space-y-4">
           <motion.button
@@ -1342,7 +1356,7 @@ function QuestionnaireScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -1489,7 +1503,7 @@ function QuestionnaireResultScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
