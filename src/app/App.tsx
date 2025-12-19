@@ -9,22 +9,22 @@ import { MotionProvider, useMotion } from './context/MotionContext';
 
 function Breadcrumb({ items, onNavigate }: { items: { label: string; onClick?: () => void }[]; onNavigate?: (index: number) => void }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-neutral-600 mb-4">
+    <div className="flex items-center gap-1.5 text-xs text-white/70">
       {items.map((item, index) => (
-        <div key={index} className="flex items-center gap-2">
+        <div key={index} className="flex items-center gap-1.5">
           {item.onClick ? (
             <button
               onClick={item.onClick}
-              className="hover:text-neutral-800 transition-colors"
+              className="hover:text-white/90 transition-colors"
             >
               {item.label}
             </button>
           ) : (
-            <span className={index === items.length - 1 ? 'text-neutral-800 font-medium' : ''}>
+            <span className={index === items.length - 1 ? 'text-white font-medium' : ''}>
               {item.label}
             </span>
           )}
-          {index < items.length - 1 && <span>›</span>}
+          {index < items.length - 1 && <span className="opacity-50">›</span>}
         </div>
       ))}
     </div>
@@ -538,6 +538,12 @@ function CategoryScreen({
               <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
+          <Breadcrumb
+            items={[
+              { label: 'Übungen', onClick: onBack },
+              { label: category.name }
+            ]}
+          />
           <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
           <h2 className="text-4xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
           <p className="opacity-90 leading-relaxed">{category.description}</p>
@@ -545,12 +551,6 @@ function CategoryScreen({
       </motion.div>
 
       <div className="max-w-md mx-auto px-6 py-8 space-y-4 relative z-10">
-        <Breadcrumb
-          items={[
-            { label: 'Übungen', onClick: onBack },
-            { label: category.name }
-          ]}
-        />
         {categoryCards.map((card, index) => (
           <motion.button
             key={card.id}
@@ -655,8 +655,8 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
         transition={{ delay: 0.1, duration: 0.5 }}
         className={`${category.colorClass} px-6 py-6 relative z-10`}
       >
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-between mb-2">
+        <div className="max-w-md mx-auto space-y-2">
+          <div className="flex items-center justify-between">
             <motion.button
               whileHover={{ x: -4 }}
               whileTap={{ scale: 0.95 }}
@@ -676,12 +676,6 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
               <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
-          <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
-        </div>
-      </motion.div>
-
-      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative z-10">
-        <div className="max-w-md w-full space-y-8">
           <Breadcrumb
             items={[
               { label: 'Übungen', onClick: () => { const card = cards.find(c => c.id === cardId); if (card) onBack(); } },
@@ -689,6 +683,12 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
               { label: card.title }
             ]}
           />
+          <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
+        </div>
+      </motion.div>
+
+      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative z-10">
+        <div className="max-w-md w-full space-y-8">
           <div className="space-y-4">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -1201,17 +1201,17 @@ function RecoveryDetailScreen({
               <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
             </motion.button>
           </div>
+          <Breadcrumb
+            items={[
+              { label: 'Erholung', onClick: onBack },
+              { label: recovery.name }
+            ]}
+          />
           <h2 className="text-3xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
         </div>
       </motion.div>
 
       <div className="flex-1 max-w-md mx-auto px-6 py-8 space-y-8 relative z-10">
-        <Breadcrumb
-          items={[
-            { label: 'Erholung', onClick: onBack },
-            { label: recovery.name }
-          ]}
-        />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
