@@ -20,7 +20,7 @@ function BottomNav({
         <div className="flex p-2 gap-2">
           <button
             onClick={() => onTabChange('exercises')}
-            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl ${
+            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl outline-none focus:outline-none ${
               currentTab === 'exercises'
                 ? 'bg-[#6B9BD1] text-white font-medium shadow-sm'
                 : 'text-neutral-700 hover:bg-neutral-100/50'
@@ -31,7 +31,7 @@ function BottomNav({
           </button>
           <button
             onClick={() => onTabChange('recovery')}
-            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl ${
+            className={`flex-1 py-3 px-4 text-center transition-all rounded-xl outline-none focus:outline-none ${
               currentTab === 'recovery'
                 ? 'bg-[#D4A5A5] text-white font-medium shadow-sm'
                 : 'text-neutral-700 hover:bg-neutral-100/50'
