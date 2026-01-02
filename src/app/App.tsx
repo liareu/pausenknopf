@@ -1583,24 +1583,35 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
       setCountdown((prev) => {
         if (prev > 1) return prev - 1;
 
+        // Phasenwechsel
         setBreathPhase((phase) => {
           if (phase === 'in') {
-            setCountdown(7);
             return 'hold';
           } else if (phase === 'hold') {
-            setCountdown(8);
             return 'out';
           } else {
-            setCountdown(4);
             return 'in';
           }
         });
-        return phase === 'in' ? 4 : phase === 'hold' ? 7 : 8;
+
+        // Nächsten Countdown zurückgeben
+        return prev; // Wird im nächsten Render durch useEffect aktualisiert
       });
     }, 1000);
 
     return () => clearInterval(interval);
   }, [mode]);
+
+  // Separater Effect für Countdown-Reset bei Phasenwechsel
+  useEffect(() => {
+    if (breathPhase === 'in') {
+      setCountdown(4);
+    } else if (breathPhase === 'hold') {
+      setCountdown(7);
+    } else if (breathPhase === 'out') {
+      setCountdown(8);
+    }
+  }, [breathPhase]);
 
   const phaseText = {
     in: 'Einatmen',
@@ -1740,7 +1751,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
         }}
       />
 
-      <div className="max-w-md w-full mx-auto space-y-12 flex-1 relative z-10 flex flex-col justify-center pb-32">
+      <div className="max-w-md w-full mx-auto space-y-20 flex-1 relative z-10 flex flex-col justify-center pb-32">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1750,6 +1761,9 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
           <h1 className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
             Atme mit mir
           </h1>
+          <p className="text-sm text-neutral-600 leading-relaxed px-4" style={{ letterSpacing: '0.01em' }}>
+            4 Sekunden durch die Nase einatmen · 7 Sekunden Luft anhalten · 8 Sekunden zischend durch den Mund ausatmen
+          </p>
         </motion.div>
 
         <motion.div className="flex flex-col items-center justify-center space-y-24">
