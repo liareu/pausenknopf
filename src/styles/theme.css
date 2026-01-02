@@ -3,7 +3,7 @@
 :root {
   --font-size: 16px;
   --font-family-heading: 'Rufina', serif;
-  --font-family-body: 'Red Hat Display', sans-serif;
+  --font-family-body: 'Kanit', sans-serif;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;

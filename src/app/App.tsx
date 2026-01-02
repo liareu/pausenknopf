@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { categories, cards, Category, Card, recoveryTypes, RecoveryType } from './data/cards';
 import { motion, AnimatePresence } from 'motion/react';
 import backgroundImage from '../assets/background-optimized.jpg';
@@ -7,51 +7,54 @@ import logoSvg from '../assets/logo.svg';
 import knopfSvg from '../assets/knopf.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
-import { Sparkles, BatteryMedium, Shuffle } from 'lucide-react';
+import { FavoritesProvider, useFavoritesContext } from './context/FavoritesContext';
+import { Wind, BatteryMedium, Shuffle, AlertCircle, Phone, Star, Plus, Minus, Heart, Compass, House } from 'lucide-react';
 
 function BottomNav({
   currentTab,
   onTabChange,
-  onHome
+  onHome,
+  onFavorites
 }: {
-  currentTab: 'exercises' | 'recovery';
+  currentTab: 'exercises' | 'recovery' | 'favorites' | 'none';
   onTabChange: (tab: 'exercises' | 'recovery') => void;
   onHome: () => void;
+  onFavorites: () => void;
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 flex justify-center">
-      <div className="bg-[#FDF7F3] rounded-full shadow-lg border border-neutral-200/50">
-        <div className="flex p-2 gap-2 items-center">
-          <button
-            onClick={() => onTabChange('exercises')}
-            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:bg-neutral-100/50 ${
-              currentTab === 'exercises'
-                ? 'text-[#6B9BD1]'
-                : 'text-neutral-400'
-            }`}
-            aria-label="Was hilft jetzt?"
-          >
-            <Sparkles size={22} />
-          </button>
-          <button
-            onClick={onHome}
-            className="w-16 h-16 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:opacity-80 shadow-md"
-            aria-label="Zur Startseite"
-          >
-            <img src={knopfSvg} alt="Home" className="w-12 h-12" />
-          </button>
-          <button
-            onClick={() => onTabChange('recovery')}
-            className={`w-14 h-14 flex items-center justify-center transition-all rounded-full outline-none focus:outline-none hover:bg-neutral-100/50 ${
-              currentTab === 'recovery'
-                ? 'text-[#D4A5A5]'
-                : 'text-neutral-400'
-            }`}
-            aria-label="Was fehlt mir?"
-          >
-            <BatteryMedium size={22} />
-          </button>
-        </div>
+    <div className="fixed bottom-6 left-0 right-0 z-50 px-6 flex justify-center">
+      <div className="bg-black rounded-full shadow-2xl px-8 py-4 flex items-center gap-8">
+        <button
+          onClick={onHome}
+          className={`transition-colors ${currentTab === 'none' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          aria-label="Zur Startseite"
+        >
+          <House size={24} strokeWidth={1.5} />
+        </button>
+
+        <button
+          onClick={() => onTabChange('exercises')}
+          className={`transition-colors ${currentTab === 'exercises' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          aria-label="Was hilft jetzt?"
+        >
+          <Wind size={24} strokeWidth={1.5} />
+        </button>
+
+        <button
+          onClick={() => onTabChange('recovery')}
+          className={`transition-colors ${currentTab === 'recovery' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          aria-label="Was fehlt mir?"
+        >
+          <BatteryMedium size={24} strokeWidth={1.5} />
+        </button>
+
+        <button
+          onClick={onFavorites}
+          className={`transition-colors ${currentTab === 'favorites' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          aria-label="Meine Favoriten"
+        >
+          <Heart size={24} strokeWidth={1.5} className={currentTab === 'favorites' ? 'fill-current' : ''} />
+        </button>
       </div>
     </div>
   );
@@ -59,6 +62,8 @@ function BottomNav({
 
 type Screen =
   | { type: 'start' }
+  | { type: 'sos' }
+  | { type: 'favorites' }
   | { type: 'orientation' }
   | { type: 'recovery-types' }
   | { type: 'recovery-detail'; recoveryId: string }
@@ -107,7 +112,9 @@ export default function App() {
   // Determine current tab based on screen type
   const isExercisesFlow = screen.type === 'orientation' || screen.type === 'category' || screen.type === 'card';
   const isRecoveryFlow = screen.type === 'recovery-types' || screen.type === 'recovery-detail' || screen.type === 'questionnaire' || screen.type === 'questionnaire-result';
-  const showBottomNav = isExercisesFlow || isRecoveryFlow;
+  const isFavoritesFlow = screen.type === 'favorites';
+  const hideBottomNav = screen.type === 'impressum' || screen.type === 'datenschutz';
+  const showBottomNav = !hideBottomNav;
 
   const renderScreen = () => {
     switch (screen.type) {
@@ -115,10 +122,23 @@ export default function App() {
         return (
           <StartScreen
             key="start"
+            onSOS={() => setScreen({ type: 'sos' })}
             onExercises={() => setScreen({ type: 'orientation' })}
             onRecovery={() => setScreen({ type: 'recovery-types' })}
+            onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onImpressum={() => navigateTo({ type: 'impressum' })}
             onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
+          />
+        );
+      case 'sos':
+        return <SOSScreen key="sos" onBack={() => setScreen({ type: 'start' })} onHome={navigateHome} />;
+      case 'favorites':
+        return (
+          <FavoritesScreen
+            key="favorites"
+            onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
+            onBack={() => setScreen({ type: 'start' })}
+            onHome={navigateHome}
           />
         );
       case 'recovery-types':
@@ -220,8 +240,10 @@ export default function App() {
         return (
           <StartScreen
             key="start"
+            onSOS={() => setScreen({ type: 'sos' })}
             onExercises={() => setScreen({ type: 'orientation' })}
             onRecovery={() => setScreen({ type: 'recovery-types' })}
+            onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onImpressum={() => navigateTo({ type: 'impressum' })}
             onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
@@ -231,113 +253,230 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <MotionProvider>
-        <div className="min-h-screen bg-[#FDF7F3]" role="application" aria-label="Pausenknopf App">
-          <AnimatePresence mode="wait">
-            {renderScreen()}
-          </AnimatePresence>
-          {showBottomNav && (
-            <BottomNav
-              currentTab={isExercisesFlow ? 'exercises' : 'recovery'}
-              onTabChange={handleTabChange}
-              onHome={navigateHome}
-            />
-          )}
-        </div>
-      </MotionProvider>
+      <FavoritesProvider>
+        <MotionProvider>
+          <div className="min-h-screen bg-[#FDF7F3]" role="application" aria-label="Pausenknopf App">
+            <AnimatePresence mode="wait">
+              {renderScreen()}
+            </AnimatePresence>
+            {showBottomNav && (
+              <BottomNav
+                currentTab={isExercisesFlow ? 'exercises' : isRecoveryFlow ? 'recovery' : isFavoritesFlow ? 'favorites' : 'none'}
+                onTabChange={handleTabChange}
+                onHome={navigateHome}
+                onFavorites={() => setScreen({ type: 'favorites' })}
+              />
+            )}
+          </div>
+        </MotionProvider>
+      </FavoritesProvider>
     </ErrorBoundary>
   );
 }
 
 function StartScreen({
+  onSOS,
   onExercises,
   onRecovery,
+  onSelectCategory,
   onImpressum,
   onDatenschutz
 }: {
+  onSOS: () => void;
   onExercises: () => void;
   onRecovery: () => void;
+  onSelectCategory: (categoryId: string) => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
 }) {
+
+  // Floating blobs animation
+  const floatingBlobs = [
+    { color: '#6B9BD1', size: 60, delay: 0, x: '10%', y: '15%' },
+    { color: '#D4A5A5', size: 80, delay: 2, x: '85%', y: '20%' },
+    { color: '#E8C4A0', size: 50, delay: 4, x: '75%', y: '70%' },
+    { color: '#F4A261', size: 70, delay: 1, x: '15%', y: '75%' },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col items-center justify-center px-8 py-12 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden"
       role="main"
     >
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-40"
+        className="absolute inset-0 bg-cover bg-center opacity-30"
         style={{
           backgroundImage: `url(${backgroundStart})`
         }}
       />
 
+      {/* Floating decorative blobs */}
+      {floatingBlobs.map((blob, index) => (
+        <motion.div
+          key={index}
+          className="absolute rounded-full opacity-20 blur-2xl"
+          style={{
+            backgroundColor: blob.color,
+            width: blob.size,
+            height: blob.size,
+            left: blob.x,
+            top: blob.y,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 6,
+            delay: blob.delay,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      ))}
+
       {/* Content */}
-      <div className="max-w-md w-full text-center space-y-8 relative z-10">
+      <div className="max-w-md w-full text-center space-y-6 relative z-10 pb-40">
+        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.6 }}
+          className="flex justify-center mb-4"
+        >
+          <img src={logoSvg} alt="Pausenknopf Logo" className="w-44 h-44" />
+        </motion.div>
+
+        {/* Tagline */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="flex justify-center mb-6"
+          className="text-black text-lg leading-relaxed px-4"
+          style={{ letterSpacing: '0.01em' }}
         >
-          <img src={logoSvg} alt="Pausenknopf Logo" className="w-48 h-48" />
+          Für Momente, die gerade viel sind
         </motion.div>
 
+        {/* Main Content */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="space-y-4 text-[rgb(0,0,0)] text-[20px]"
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="space-y-6 pt-4"
         >
-          <p className="text-black leading-relaxed" style={{ letterSpacing: '0.01em' }}>
-            Für Momente, die gerade viel sind
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="space-y-5"
-        >
+          {/* Panik Button - mit Gradient und pulsierendem Ring */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onExercises}
-            className="w-full py-8 px-8 bg-[#6B9BD1]/50 backdrop-blur-md text-black hover:bg-[#6B9BD1]/60 active:bg-[#6B9BD1]/45 transition-all rounded-2xl text-center border border-white/20"
-            aria-label="Was hilft jetzt? - Schnelle Übungen für den Moment"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            whileHover={{ scale: 1.05, y: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onSOS}
+            className="w-full py-10 px-8 bg-gradient-to-br from-[#D97850] to-[#c76942] text-white rounded-3xl shadow-2xl relative overflow-hidden group"
+            aria-label="Panik Button - Schnelle Atemübung"
           >
-            <div className="space-y-2">
-              <div className="text-2xl font-extrabold leading-tight" style={{ letterSpacing: '0.01em', fontWeight: 900 }}>Was hilft jetzt?</div>
-              <div className="text-sm opacity-80 leading-snug" style={{ letterSpacing: '0.01em' }}>Übungen für den Moment</div>
+            {/* Pulsierender Ring */}
+            <motion.div
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.5, 0, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="absolute inset-0 rounded-3xl border-4 border-white"
+            />
+
+            {/* Subtiler Glanz-Effekt */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent group-hover:via-white/20 transition-all duration-500" />
+
+            <div className="space-y-3 relative text-center">
+              <p className="text-4xl" style={{ letterSpacing: '0.02em' }}>Panik-Button</p>
+              <p className="text-base opacity-90" style={{ letterSpacing: '0.01em' }}>Schnelle Atemübung</p>
             </div>
           </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onRecovery}
-            className="w-full py-8 px-8 bg-[#D4A5A5]/50 backdrop-blur-md text-black hover:bg-[#D4A5A5]/60 active:bg-[#D4A5A5]/45 transition-all rounded-2xl text-center border border-white/20"
-            aria-label="Was fehlt mir? - Finde heraus, welche Erholung du brauchst"
+          {/* Schnellzugriff Kategorien - Tags */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="flex flex-wrap gap-2 justify-center px-4"
           >
-            <div className="space-y-2">
-              <div className="text-2xl font-extrabold leading-tight" style={{ letterSpacing: '0.01em', fontWeight: 900 }}>Was fehlt mir?</div>
-              <div className="text-sm opacity-80 leading-snug" style={{ letterSpacing: '0.01em' }}>Finde deine Erholung</div>
-            </div>
-          </motion.button>
+            {categories.slice(0, 6).map((category, index) => (
+              <motion.button
+                key={category.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.55 + index * 0.05, duration: 0.4 }}
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onSelectCategory(category.id)}
+                className={`${category.colorClass} px-4 py-2 rounded-full text-xs shadow-md hover:shadow-lg transition-all`}
+                style={{ letterSpacing: '0.01em' }}
+              >
+                {category.keyword}
+              </motion.button>
+            ))}
+          </motion.div>
+
+          {/* Hauptnavigation - mit Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              whileHover={{ scale: 1.03, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onExercises}
+              className="py-8 px-6 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-black/10 relative overflow-hidden group"
+              aria-label="Was hilft jetzt?"
+            >
+              {/* Solid Color Accent */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#D97850] group-hover:opacity-100 transition-opacity" />
+
+              <div className="space-y-2 text-left">
+                <p className="text-xl text-black" style={{ letterSpacing: '0.01em' }}>Was hilft jetzt?</p>
+                <p className="text-xs text-neutral-600" style={{ letterSpacing: '0.01em' }}>Übungen für den Moment</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.75, duration: 0.5 }}
+              whileHover={{ scale: 1.03, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onRecovery}
+              className="py-8 px-6 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-black/10 relative overflow-hidden group"
+              aria-label="Was fehlt mir?"
+            >
+              {/* Solid Color Accent */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#E5C5B5] group-hover:opacity-100 transition-opacity" />
+
+              <div className="space-y-2 text-left">
+                <p className="text-xl text-black" style={{ letterSpacing: '0.01em' }}>Was fehlt mir?</p>
+                <p className="text-xs text-neutral-600" style={{ letterSpacing: '0.01em' }}>Finde deine Erholung</p>
+              </div>
+            </motion.button>
+          </div>
         </motion.div>
       </div>
 
+      {/* Footer */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="absolute bottom-6 left-0 right-0 px-8"
+        transition={{ delay: 0.7, duration: 0.6 }}
+        className="absolute bottom-28 left-0 right-0 px-6"
       >
         <div className="max-w-md mx-auto space-y-3">
           <div className="text-center">
@@ -378,7 +517,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onImpressum
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -480,9 +619,10 @@ function CategoryScreen({
           <p className="text-neutral-600">Kategorie nicht gefunden</p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full max-w-xs mx-auto py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center block"
+            aria-label="Zurück"
           >
-            Zurück
+            ← Zurück
           </button>
         </div>
       </div>
@@ -517,7 +657,7 @@ function CategoryScreen({
         </div>
       </motion.div>
 
-      <div className="max-w-md mx-auto px-6 py-8 pb-24 space-y-4 relative z-10">
+      <div className="max-w-md mx-auto px-6 py-8 pb-32 space-y-4 relative z-10">
         {categoryCards.map((card, index) => (
           <motion.button
             key={card.id}
@@ -533,7 +673,87 @@ function CategoryScreen({
             <h3 className="text-lg" style={{ letterSpacing: '0.01em' }}>{card.title}</h3>
           </motion.button>
         ))}
+
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onBack}
+          className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center mt-8"
+          aria-label="Zurück"
+        >
+          ← Zurück
+        </motion.button>
       </div>
+    </motion.div>
+  );
+}
+
+// Wiederverwendbare Atemkreis-Komponente
+function BreathingCircle() {
+  const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out'>('in');
+  const [countdown, setCountdown] = useState(4);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev > 1) return prev - 1;
+
+        setBreathPhase((phase) => {
+          if (phase === 'in') {
+            setCountdown(4);
+            return 'hold';
+          } else if (phase === 'hold') {
+            setCountdown(4);
+            return 'out';
+          } else {
+            setCountdown(4);
+            return 'in';
+          }
+        });
+        return 4;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const phaseText = {
+    in: 'Einatmen',
+    hold: 'Halten',
+    out: 'Ausatmen'
+  };
+
+  const phaseColor = {
+    in: 'bg-[#6B9BD1]',
+    hold: 'bg-[#D4A5A5]',
+    out: 'bg-[#E8C4A0]'
+  };
+
+  return (
+    <motion.div className="flex flex-col items-center justify-center space-y-16 py-8">
+      <motion.div
+        animate={{
+          scale: breathPhase === 'in' ? 1.5 : breathPhase === 'hold' ? 1.5 : 1,
+        }}
+        transition={{ duration: breathPhase === 'hold' ? 0 : 4, ease: "easeInOut" }}
+        className={`w-32 h-32 rounded-full ${phaseColor[breathPhase]} flex items-center justify-center text-white text-4xl font-bold shadow-2xl`}
+      >
+        {countdown}
+      </motion.div>
+
+      <motion.div
+        key={breathPhase}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center"
+      >
+        <p className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+          {phaseText[breathPhase]}
+        </p>
+      </motion.div>
     </motion.div>
   );
 }
@@ -541,6 +761,10 @@ function CategoryScreen({
 function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, onDatenschutz }: { cardId: string; onBack: () => void; onRandomCard: () => void; onHome: () => void; onImpressum: () => void; onDatenschutz: () => void }) {
   const card = cards.find(c => c.id === cardId);
   const category = card ? categories.find(c => c.id === card.categoryId) : null;
+  const { isFavorite, toggleFavorite } = useFavoritesContext();
+
+  // Prüfe ob es eine Atemübung ist (Kategorie "blau")
+  const isBreathingExercise = category?.id === 'blau';
 
   if (!card || !category) {
     return (
@@ -549,9 +773,10 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
           <p className="text-neutral-600">Karte nicht gefunden</p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full max-w-xs mx-auto py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center block"
+            aria-label="Zurück"
           >
-            Zurück
+            ← Zurück
           </button>
         </div>
       </div>
@@ -598,6 +823,17 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
             </motion.h2>
           </div>
 
+          {/* Atemkreis nur für Atemübungen (Kategorie "blau") */}
+          {isBreathingExercise && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              <BreathingCircle />
+            </motion.div>
+          )}
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -628,17 +864,43 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, o
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="px-6 py-6 pb-24 relative z-10 flex justify-center"
+        className="px-6 py-6 pb-32 relative z-10"
       >
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onRandomCard}
-          className="w-12 h-12 flex items-center justify-center bg-black text-white hover:bg-neutral-800 transition-colors rounded-full outline-none focus:outline-none"
-          aria-label="Noch eine zufällige Karte anzeigen"
-        >
-          <Shuffle size={20} />
-        </motion.button>
+        <div className="max-w-md mx-auto space-y-4">
+          <div className="flex justify-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => toggleFavorite(cardId)}
+              className={`w-12 h-12 flex items-center justify-center ${
+                isFavorite(cardId)
+                  ? 'bg-[#F4A261] text-white'
+                  : 'bg-white text-neutral-600 border-2 border-neutral-300'
+              } hover:opacity-80 transition-all rounded-full outline-none focus:outline-none`}
+              aria-label={isFavorite(cardId) ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
+            >
+              <Heart size={20} className={isFavorite(cardId) ? 'fill-current' : ''} />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onRandomCard}
+              className="w-12 h-12 flex items-center justify-center bg-black text-white hover:bg-neutral-800 transition-colors rounded-full outline-none focus:outline-none"
+              aria-label="Noch eine zufällige Karte anzeigen"
+            >
+              <Shuffle size={20} />
+            </motion.button>
+          </div>
+          <motion.button
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
+            aria-label="Zurück"
+          >
+            ← Zurück
+          </motion.button>
+        </div>
       </motion.div>
     </motion.div>
   );
@@ -855,7 +1117,7 @@ function RecoveryTypesScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -947,9 +1209,10 @@ function RecoveryDetailScreen({
           <p className="text-neutral-600">Erholungstyp nicht gefunden</p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full max-w-xs mx-auto py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center block"
+            aria-label="Zurück"
           >
-            Zurück
+            ← Zurück
           </button>
         </div>
       </div>
@@ -1016,7 +1279,7 @@ function RecoveryDetailScreen({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}
-        className="px-6 py-6 pb-24 relative z-10"
+        className="px-6 py-6 pb-32 relative z-10"
       >
         <div className="max-w-md mx-auto space-y-4">
           <motion.button
@@ -1027,6 +1290,15 @@ function RecoveryDetailScreen({
             aria-label="Fragebogen starten"
           >
             Unsicher? Mach den Fragebogen
+          </motion.button>
+          <motion.button
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
+            aria-label="Zurück"
+          >
+            ← Zurück
           </motion.button>
         </div>
       </motion.div>
@@ -1073,7 +1345,7 @@ function QuestionnaireScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -1128,23 +1400,38 @@ function QuestionnaireScreen({
           })}
         </motion.div>
 
-        <motion.button
+        <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: selectedSigns.length > 0 ? 1 : 0.5 }}
-          transition={{ duration: 0.3 }}
-          whileHover={selectedSigns.length > 0 ? { scale: 1.02 } : {}}
-          whileTap={selectedSigns.length > 0 ? { scale: 0.98 } : {}}
-          onClick={handleSubmit}
-          disabled={selectedSigns.length === 0}
-          className={`w-full py-4 px-6 rounded-lg transition-colors ${
-            selectedSigns.length > 0
-              ? 'bg-black text-white hover:bg-neutral-800'
-              : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
-          }`}
-          aria-label="Auswertung anzeigen"
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="space-y-3"
         >
-          Auswertung ({selectedSigns.length} ausgewählt)
-        </motion.button>
+          <motion.button
+            animate={{ opacity: selectedSigns.length > 0 ? 1 : 0.5 }}
+            transition={{ duration: 0.3 }}
+            whileHover={selectedSigns.length > 0 ? { scale: 1.02 } : {}}
+            whileTap={selectedSigns.length > 0 ? { scale: 0.98 } : {}}
+            onClick={handleSubmit}
+            disabled={selectedSigns.length === 0}
+            className={`w-full py-4 px-6 rounded-lg transition-colors ${
+              selectedSigns.length > 0
+                ? 'bg-black text-white hover:bg-neutral-800'
+                : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
+            }`}
+            aria-label="Auswertung anzeigen"
+          >
+            Auswertung ({selectedSigns.length} ausgewählt)
+          </motion.button>
+          <motion.button
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
+            aria-label="Zurück"
+          >
+            ← Zurück
+          </motion.button>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -1181,7 +1468,7 @@ function QuestionnaireResultScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col px-6 py-12 pb-24 relative overflow-hidden"
+      className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
       {/* Background Image */}
       <div
@@ -1268,7 +1555,425 @@ function QuestionnaireResultScreen({
           >
             Nochmal versuchen
           </motion.button>
+          <motion.button
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
+            aria-label="Zurück"
+          >
+            ← Zurück
+          </motion.button>
         </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void }) {
+  const [mode, setMode] = useState<'breathing' | 'grounding'>('breathing');
+  const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out'>('in');
+  const [countdown, setCountdown] = useState(4);
+  const [contactsOpen, setContactsOpen] = useState(false);
+
+  useEffect(() => {
+    if (mode !== 'breathing') return;
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev > 1) return prev - 1;
+
+        setBreathPhase((phase) => {
+          if (phase === 'in') {
+            setCountdown(7);
+            return 'hold';
+          } else if (phase === 'hold') {
+            setCountdown(8);
+            return 'out';
+          } else {
+            setCountdown(4);
+            return 'in';
+          }
+        });
+        return phase === 'in' ? 4 : phase === 'hold' ? 7 : 8;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [mode]);
+
+  const phaseText = {
+    in: 'Einatmen',
+    hold: 'Halten',
+    out: 'Ausatmen'
+  };
+
+  const phaseColor = {
+    in: 'bg-[#6B9BD1]',
+    hold: 'bg-[#D4A5A5]',
+    out: 'bg-[#E8C4A0]'
+  };
+
+  const phaseDuration = {
+    in: 4,
+    hold: 7,
+    out: 8
+  };
+
+  // 5-4-3-2-1 Grounding Technik
+  if (mode === 'grounding') {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
+      >
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{
+            backgroundImage: `url(${backgroundStart})`
+          }}
+        />
+
+        <div className="max-w-md w-full mx-auto space-y-8 flex-1 relative z-10 flex flex-col justify-center pb-32">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="text-center space-y-3"
+          >
+            <h1 className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+              5-4-3-2-1 Technik
+            </h1>
+            <p className="text-sm text-neutral-600">Nimm dir Zeit für jeden Schritt</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="space-y-6"
+          >
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-2xl font-bold text-[#8FB89C]">5</p>
+                <p className="text-neutral-800 font-medium">Nenne 5 Dinge, die du sehen kannst</p>
+                <p className="text-sm text-neutral-600">Schau dich um. Was siehst du?</p>
+              </div>
+            </div>
+
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-2xl font-bold text-[#8FB89C]">4</p>
+                <p className="text-neutral-800 font-medium">Nenne 4 Dinge, die du berühren kannst</p>
+                <p className="text-sm text-neutral-600">Spüre die Textur, die Temperatur</p>
+              </div>
+            </div>
+
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-2xl font-bold text-[#8FB89C]">3</p>
+                <p className="text-neutral-800 font-medium">Nenne 3 Dinge, die du hören kannst</p>
+                <p className="text-sm text-neutral-600">Lausche auf Geräusche um dich herum</p>
+              </div>
+            </div>
+
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-2xl font-bold text-[#8FB89C]">2</p>
+                <p className="text-neutral-800 font-medium">Nenne 2 Dinge, die du riechen kannst</p>
+                <p className="text-sm text-neutral-600">Was kannst du wahrnehmen?</p>
+              </div>
+            </div>
+
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-2xl font-bold text-[#8FB89C]">1</p>
+                <p className="text-neutral-800 font-medium">Nenne 1 Ding, das du schmecken kannst</p>
+                <p className="text-sm text-neutral-600">Vielleicht ein Getränk oder Essen?</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="space-y-3"
+          >
+            <button
+              onClick={() => setMode('breathing')}
+              className="w-full py-4 px-6 bg-[#6B9BD1] text-white hover:bg-[#5a8bc0] transition-colors rounded-lg font-medium"
+            >
+              Zur Atemübung wechseln
+            </button>
+            <motion.button
+              whileHover={{ x: -4 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
+              aria-label="Zurück"
+            >
+              ← Zurück
+            </motion.button>
+          </motion.div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Atemübung (bestehender Code)
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
+    >
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{
+          backgroundImage: `url(${backgroundStart})`
+        }}
+      />
+
+      <div className="max-w-md w-full mx-auto space-y-12 flex-1 relative z-10 flex flex-col justify-center pb-32">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="text-center space-y-3"
+        >
+          <h1 className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+            Atme mit mir
+          </h1>
+        </motion.div>
+
+        <motion.div className="flex flex-col items-center justify-center space-y-24">
+          <motion.div
+            animate={{
+              scale: breathPhase === 'in' ? 1.8 : breathPhase === 'hold' ? 1.8 : 1,
+            }}
+            transition={{
+              duration: breathPhase === 'in' ? 4 : breathPhase === 'hold' ? 0.5 : 8,
+              ease: "easeInOut"
+            }}
+            className={`w-40 h-40 rounded-full ${phaseColor[breathPhase]} flex items-center justify-center text-white text-5xl font-bold shadow-2xl`}
+          >
+            {countdown}
+          </motion.div>
+
+          <motion.div
+            key={breathPhase}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <p className="text-4xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+              {phaseText[breathPhase]}
+            </p>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          className="text-center space-y-3"
+        >
+          <p className="text-neutral-700 leading-relaxed px-4" style={{ letterSpacing: '0.01em' }}>
+            Du bist nicht allein
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.6 }}
+          className="space-y-3"
+        >
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl overflow-hidden">
+            <button
+              onClick={() => setContactsOpen(!contactsOpen)}
+              className="w-full py-3 px-6 cursor-pointer text-center text-sm font-semibold text-neutral-700 hover:bg-white/40 transition-colors flex items-center justify-center gap-2"
+            >
+              <Phone size={16} />
+              <span>Notfallkontakte</span>
+              {contactsOpen ? <Minus size={16} /> : <Plus size={16} />}
+            </button>
+            {contactsOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="p-4 space-y-2 bg-white/40"
+              >
+                <a
+                  href="tel:08001110111"
+                  className="flex items-center justify-between w-full py-3 px-4 bg-[#E63946]/90 hover:bg-[#E63946] text-white rounded-xl transition-colors text-sm font-semibold"
+                >
+                  <span>Telefonseelsorge</span>
+                  <span className="text-xs">0800 111 0 111</span>
+                </a>
+                <a
+                  href="tel:08001110222"
+                  className="flex items-center justify-between w-full py-3 px-4 bg-[#E63946]/90 hover:bg-[#E63946] text-white rounded-xl transition-colors text-sm font-semibold"
+                >
+                  <span>Telefonseelsorge</span>
+                  <span className="text-xs">0800 111 0 222</span>
+                </a>
+                <a
+                  href="tel:116111"
+                  className="flex items-center justify-between w-full py-3 px-4 bg-[#6B9BD1]/90 hover:bg-[#6B9BD1] text-white rounded-xl transition-colors text-sm font-semibold"
+                >
+                  <span>Kinder-/Jugendtelefon</span>
+                  <span className="text-xs">116 111</span>
+                </a>
+                <p className="text-xs text-neutral-600 text-center mt-3" style={{ letterSpacing: '0.01em' }}>
+                  Diese App ersetzt keine professionelle Hilfe
+                </p>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9, duration: 0.5 }}
+          className="space-y-3"
+        >
+          <button
+            onClick={() => setMode('grounding')}
+            className="w-full py-4 px-6 bg-[#8FB89C] text-white hover:bg-[#7da88a] transition-colors rounded-lg font-medium"
+          >
+            5-4-3-2-1 Technik ausprobieren
+          </button>
+          <motion.button
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
+            aria-label="Zurück"
+          >
+            ← Zurück
+          </motion.button>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FavoritesScreen({
+  onSelectCard,
+  onBack,
+  onHome
+}: {
+  onSelectCard: (cardId: string) => void;
+  onBack: () => void;
+  onHome: () => void;
+}) {
+  const { favorites } = useFavoritesContext();
+  const favoriteCards = cards.filter(card => favorites.includes(card.id));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
+    >
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-25"
+        style={{
+          backgroundImage: `url(${backgroundStart})`
+        }}
+      />
+
+      <div className="max-w-md w-full mx-auto space-y-6 flex-1 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="space-y-3 text-center"
+        >
+          <div className="flex items-center justify-center gap-2">
+            <Heart size={32} className="text-neutral-600" />
+            <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Meine Favoriten</h1>
+          </div>
+          <p className="text-sm text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+            {favoriteCards.length} {favoriteCards.length === 1 ? 'Karte' : 'Karten'} gespeichert
+          </p>
+        </motion.div>
+
+        {favoriteCards.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="flex-1 flex items-center justify-center"
+          >
+            <div className="text-center space-y-4 py-12">
+              <Heart size={64} className="mx-auto text-neutral-300" />
+              <p className="text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+                Noch keine Favoriten
+              </p>
+              <p className="text-sm text-neutral-500" style={{ letterSpacing: '0.01em' }}>
+                Tippe auf das Herz bei einer Karte, um sie hier zu speichern
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="space-y-3">
+            {favoriteCards.map((card, index) => {
+              const category = categories.find(c => c.id === card.categoryId);
+              return (
+                <motion.button
+                  key={card.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onSelectCard(card.id)}
+                  className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200"
+                  style={{ borderLeftWidth: '4px', borderLeftColor: category?.color || '#000' }}
+                  aria-label={`Karte ${card.title} öffnen`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: `${category?.color}40`, color: category?.color }}>
+                          {category?.keyword}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold" style={{ letterSpacing: '0.01em' }}>{card.title}</h3>
+                    </div>
+                    <Heart size={20} className="text-neutral-600 flex-shrink-0" />
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onBack}
+          className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center mt-6"
+          aria-label="Zurück"
+        >
+          ← Zurück
+        </motion.button>
       </div>
     </motion.div>
   );
