@@ -149,8 +149,6 @@ export default function App() {
             onStartQuestionnaire={() => setScreen({ type: 'questionnaire' })}
             onHome={navigateHome}
             onBack={() => setScreen({ type: 'start' })}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'recovery-detail':
@@ -161,8 +159,6 @@ export default function App() {
             onBack={() => setScreen({ type: 'recovery-types' })}
             onStartQuestionnaire={() => setScreen({ type: 'questionnaire' })}
             onHome={navigateHome}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'questionnaire':
@@ -172,8 +168,6 @@ export default function App() {
             onSubmit={(selectedSigns) => setScreen({ type: 'questionnaire-result', selectedSigns })}
             onBack={() => setScreen({ type: 'recovery-types' })}
             onHome={navigateHome}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'questionnaire-result':
@@ -185,8 +179,6 @@ export default function App() {
             onRetry={() => setScreen({ type: 'questionnaire' })}
             onBack={() => setScreen({ type: 'recovery-types' })}
             onHome={navigateHome}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'orientation':
@@ -196,8 +188,6 @@ export default function App() {
             onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
             onHome={navigateHome}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'category':
@@ -208,8 +198,6 @@ export default function App() {
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
             onBack={() => setScreen({ type: 'orientation' })}
             onHome={navigateHome}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'card':
@@ -228,8 +216,6 @@ export default function App() {
               setScreen({ type: 'card', cardId: randomCard.id });
             }}
             onHome={navigateHome}
-            onImpressum={() => navigateTo({ type: 'impressum' })}
-            onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
           />
         );
       case 'impressum':
@@ -484,17 +470,17 @@ function StartScreen({
               mit liebe entwickelt von Julia Reuter für dich {'<3'}
             </p>
           </div>
-          <div className="flex justify-center gap-4 text-xs text-neutral-600">
+          <div className="flex justify-center gap-4 text-[8px] text-neutral-500">
             <button
               onClick={onImpressum}
-              className="hover:text-neutral-800 transition-colors"
+              className="hover:text-neutral-700 transition-colors"
             >
               Impressum
             </button>
             <span>·</span>
             <button
               onClick={onDatenschutz}
-              className="hover:text-neutral-800 transition-colors"
+              className="hover:text-neutral-700 transition-colors"
             >
               Datenschutz
             </button>
@@ -505,7 +491,7 @@ function StartScreen({
   );
 }
 
-function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onImpressum, onDatenschutz }: { onSelectCategory: (categoryId: string) => void; onSelectCard: (cardId: string) => void; onHome: () => void; onImpressum: () => void; onDatenschutz: () => void }) {
+function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelectCategory: (categoryId: string) => void; onSelectCard: (cardId: string) => void; onHome: () => void }) {
   const getRandomCard = () => {
     const randomCard = cards[Math.floor(Math.random() * cards.length)];
     onSelectCard(randomCard.id);
@@ -598,16 +584,12 @@ function CategoryScreen({
   categoryId,
   onSelectCard,
   onBack,
-  onHome,
-  onImpressum,
-  onDatenschutz
+  onHome
 }: {
   categoryId: string;
   onSelectCard: (cardId: string) => void;
   onBack: () => void;
   onHome: () => void;
-  onImpressum: () => void;
-  onDatenschutz: () => void;
 }) {
   const category = categories.find(c => c.id === categoryId);
   const categoryCards = cards.filter(c => c.categoryId === categoryId);
@@ -758,7 +740,7 @@ function BreathingCircle() {
   );
 }
 
-function CardDetailScreen({ cardId, onBack, onRandomCard, onHome, onImpressum, onDatenschutz }: { cardId: string; onBack: () => void; onRandomCard: () => void; onHome: () => void; onImpressum: () => void; onDatenschutz: () => void }) {
+function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: string; onBack: () => void; onRandomCard: () => void; onHome: () => void }) {
   const card = cards.find(c => c.id === cardId);
   const category = card ? categories.find(c => c.id === card.categoryId) : null;
   const { isFavorite, toggleFavorite } = useFavoritesContext();
@@ -1100,16 +1082,12 @@ function RecoveryTypesScreen({
   onSelectRecovery,
   onStartQuestionnaire,
   onHome,
-  onBack,
-  onImpressum,
-  onDatenschutz
+  onBack
 }: {
   onSelectRecovery: (recoveryId: string) => void;
   onStartQuestionnaire: () => void;
   onHome: () => void;
   onBack: () => void;
-  onImpressum: () => void;
-  onDatenschutz: () => void;
 }) {
   return (
     <motion.div
@@ -1189,16 +1167,12 @@ function RecoveryDetailScreen({
   recoveryId,
   onBack,
   onStartQuestionnaire,
-  onHome,
-  onImpressum,
-  onDatenschutz
+  onHome
 }: {
   recoveryId: string;
   onBack: () => void;
   onStartQuestionnaire: () => void;
   onHome: () => void;
-  onImpressum: () => void;
-  onDatenschutz: () => void;
 }) {
   const recovery = recoveryTypes.find(r => r.id === recoveryId);
 
@@ -1309,15 +1283,11 @@ function RecoveryDetailScreen({
 function QuestionnaireScreen({
   onSubmit,
   onBack,
-  onHome,
-  onImpressum,
-  onDatenschutz
+  onHome
 }: {
   onSubmit: (selectedSigns: string[]) => void;
   onBack: () => void;
   onHome: () => void;
-  onImpressum: () => void;
-  onDatenschutz: () => void;
 }) {
   const [selectedSigns, setSelectedSigns] = useState<string[]>([]);
 
@@ -1442,17 +1412,13 @@ function QuestionnaireResultScreen({
   onViewDetail,
   onRetry,
   onBack,
-  onHome,
-  onImpressum,
-  onDatenschutz
+  onHome
 }: {
   selectedSigns: string[];
   onViewDetail: (recoveryId: string) => void;
   onRetry: () => void;
   onBack: () => void;
   onHome: () => void;
-  onImpressum: () => void;
-  onDatenschutz: () => void;
 }) {
   const scores = recoveryTypes.map(recovery => {
     const matchCount = recovery.signs.filter(sign => selectedSigns.includes(sign)).length;
