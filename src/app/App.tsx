@@ -8,17 +8,7 @@ import knopfSvg from '../assets/knopf.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { FavoritesProvider, useFavoritesContext } from './context/FavoritesContext';
-import { Wind, BatteryMedium, Shuffle, AlertCircle, Phone, Star, Plus, Minus, Heart, Compass, House, Search, X, Moon, CloudRain, Cloud, Zap } from 'lucide-react';
-
-// Icon mapping for situations
-const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  'AlertCircle': AlertCircle,
-  'Moon': Moon,
-  'CloudRain': CloudRain,
-  'Wind': Wind,
-  'Cloud': Cloud,
-  'Zap': Zap
-};
+import { Shuffle, Phone, Star, Plus, Minus, Heart, Search, X } from 'lucide-react';
 
 // Search utility function
 function searchCards(query: string, allCards: Card[]): Card[] {
@@ -1649,7 +1639,6 @@ function SituationsScreen({
 
         <div className="grid grid-cols-2 gap-3 pt-4">
           {situations.map((situation, index) => {
-            const Icon = iconMap[situation.icon];
             return (
               <motion.button
                 key={situation.id}
@@ -1664,7 +1653,6 @@ function SituationsScreen({
                 aria-label={`${situation.name} auswählen`}
               >
                 <div className="space-y-2 w-full text-center flex flex-col items-center justify-center">
-                  {Icon && <Icon size={48} className="text-neutral-900" />}
                   <h3
                     className="text-lg font-medium text-neutral-900 break-words"
                     style={{ letterSpacing: '0.01em' }}
@@ -1747,12 +1735,6 @@ function SituationResultScreen({
         className={`${situation.colorClass} text-white px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <div className="flex justify-center">
-            {(() => {
-              const Icon = iconMap[situation.icon];
-              return Icon ? <Icon size={64} className="text-black" /> : null;
-            })()}
-          </div>
           <h2 className="text-3xl text-center text-black" style={{ letterSpacing: '0.02em' }}>{situation.name}</h2>
           <p className="text-center text-black/80 leading-relaxed" style={{ letterSpacing: '0.01em' }}>
             {situation.description}
