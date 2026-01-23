@@ -5,13 +5,7 @@ import backgroundImage from '../assets/background-optimized.jpg';
 import backgroundStart from '../assets/background-start.jpg';
 import logoSvg from '../assets/logo.svg';
 import knopfSvg from '../assets/knopf.svg';
-import innererSichererOrtAudio from '../assets/innerer-sicherer-ort.m4a';
 import { ErrorBoundary } from './components/ErrorBoundary';
-
-// Audio files mapping
-const audioFiles: Record<string, string> = {
-  'innerer-sicherer-ort.m4a': innererSichererOrtAudio
-};
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { FavoritesProvider, useFavoritesContext } from './context/FavoritesContext';
 import { Wind, BatteryMedium, Shuffle, AlertCircle, Phone, Star, Plus, Minus, Heart, Compass, House, Search, X, Moon, CloudRain, Cloud, Zap } from 'lucide-react';
@@ -957,7 +951,7 @@ function AudioPlayer({ audioFile }: { audioFile: string }) {
     >
       <audio
         ref={audioRef}
-        src={audioFiles[audioFile] || audioFile}
+        src={audioFile}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
