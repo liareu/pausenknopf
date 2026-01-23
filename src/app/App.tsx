@@ -1,14 +1,42 @@
 import { useState, useEffect, useRef } from 'react';
-import { categories, cards, Category, Card, recoveryTypes, RecoveryType, situations, Situation } from './data/cards';
+import { categories, cards, Category, Card, recoveryTypes, RecoveryType, situations, Situation, affirmations, Affirmation } from './data/cards';
 import { motion, AnimatePresence } from 'motion/react';
 import backgroundImage from '../assets/background-optimized.jpg';
 import backgroundStart from '../assets/background-start.jpg';
+import backgroundDark from '../assets/background-dark.jpg';
 import logoSvg from '../assets/logo.svg';
 import knopfSvg from '../assets/knopf.svg';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { FavoritesProvider, useFavoritesContext } from './context/FavoritesContext';
-import { Shuffle, Phone, Star, Plus, Minus, Heart, Search, X } from 'lucide-react';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { Shuffle, Phone, Star, Plus, Minus, Heart, Search, X, House, Compass, Wind, CircleHelp, Moon, Sun } from 'lucide-react';
+
+// Get daily affirmation based on current date
+function getDailyAffirmation(): Affirmation {
+  const today = new Date();
+  const dayOfMonth = today.getDate(); // 1-31
+  const index = (dayOfMonth - 1) % affirmations.length;
+  return affirmations[index];
+}
+
+// Background Image Component
+function BackgroundImage({ opacity = 'opacity-25' }: { opacity?: string }) {
+  const { actualTheme } = useTheme();
+  const bgImage = actualTheme === 'dark' ? backgroundDark : backgroundStart;
+
+  // Im Dark Mode volle Opacity, im Light Mode die übergebene Opacity
+  const finalOpacity = actualTheme === 'dark' ? 'opacity-100' : opacity;
+
+  return (
+    <div
+      className={`absolute inset-0 bg-cover bg-center ${finalOpacity} transition-opacity duration-300`}
+      style={{
+        backgroundImage: `url(${bgImage})`
+      }}
+    />
+  );
+}
 
 // Search utility function
 function searchCards(query: string, allCards: Card[]): Card[] {
@@ -30,6 +58,29 @@ function searchCards(query: string, allCards: Card[]): Card[] {
   });
 }
 
+// Get category color optimized for current theme
+function getCategoryColor(categoryId: string, isDark: boolean): string {
+  const darkColors: Record<string, string> = {
+    'blau': '#7AABDB',      // chart-1 - optimiert für Dark Mode
+    'orange': '#E8A87C',    // chart-2 - optimiert für Dark Mode
+    'koralle': '#E08860',   // chart-3 - optimiert für Dark Mode
+    'gruen': '#9FC8AC',     // chart-4 - optimiert für Dark Mode
+    'rosa': '#DCB3B3',      // chart-5 - optimiert für Dark Mode
+    'beige': '#C9B5A8'      // Beige funktioniert in beiden Modi
+  };
+
+  const lightColors: Record<string, string> = {
+    'blau': '#6B9BD1',
+    'orange': '#E89B6C',
+    'koralle': '#D97850',
+    'gruen': '#8FB89C',
+    'rosa': '#D4A5A5',
+    'beige': '#C9B5A8'
+  };
+
+  return isDark ? darkColors[categoryId] : lightColors[categoryId];
+}
+
 function BottomNav({
   currentTab,
   onTabChange,
@@ -41,39 +92,69 @@ function BottomNav({
   onHome: () => void;
   onFavorites: () => void;
 }) {
+  const { theme, actualTheme, toggleTheme } = useTheme();
+
+  const getThemeIcon = () => {
+    if (theme === 'system') {
+      return actualTheme === 'dark' ? <Moon size={18} /> : <Sun size={18} />;
+    }
+    return theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />;
+  };
+
+  const getThemeLabel = () => {
+    if (theme === 'system') return 'Auto';
+    return theme === 'dark' ? 'Dark' : 'Light';
+  };
+
   return (
     <div className="fixed bottom-6 left-0 right-0 z-50 px-6 flex justify-center">
-      <div className="bg-black rounded-full shadow-2xl px-6 py-3 flex items-center gap-4">
+      <div className="bg-black dark:bg-white/10 dark:backdrop-blur-xl rounded-full shadow-2xl px-6 py-3 flex items-center gap-4 transition-colors">
         <button
           onClick={onHome}
-          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'none' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'none' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Zur Startseite"
         >
-          Start
+          <House size={18} />
+          <span>Start</span>
         </button>
 
         <button
           onClick={() => onTabChange('exercises')}
-          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'exercises' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'exercises' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Was hilft jetzt?"
         >
-          Übungen
+          <Compass size={18} />
+          <span>Übungen</span>
         </button>
 
         <button
           onClick={() => onTabChange('recovery')}
-          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'recovery' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'recovery' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Was fehlt mir?"
         >
-          Erholung
+          <Wind size={18} />
+          <span>Erholung</span>
         </button>
 
         <button
           onClick={onFavorites}
-          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'favorites' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'favorites' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Meine Favoriten"
         >
-          Favoriten
+          <Heart size={18} />
+          <span>Favoriten</span>
+        </button>
+
+        <div className="w-px h-6 bg-neutral-700 dark:bg-neutral-500" />
+
+        <button
+          onClick={toggleTheme}
+          className="transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 text-neutral-400 dark:text-neutral-300 hover:text-white"
+          aria-label={`Theme wechseln (aktuell: ${getThemeLabel()})`}
+          title={`Theme: ${getThemeLabel()}`}
+        >
+          {getThemeIcon()}
+          <span className="text-xs">{getThemeLabel()}</span>
         </button>
       </div>
     </div>
@@ -230,6 +311,7 @@ export default function App() {
             onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
             onHome={navigateHome}
+            onSituations={() => setScreen({ type: 'situations' })}
           />
         );
       case 'category':
@@ -281,23 +363,25 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <FavoritesProvider>
-        <MotionProvider>
-          <div className="min-h-screen bg-[#FDF7F3]" role="application" aria-label="Pausenknopf App">
-            <AnimatePresence mode="wait">
-              {renderScreen()}
-            </AnimatePresence>
-            {showBottomNav && (
-              <BottomNav
-                currentTab={isExercisesFlow ? 'exercises' : isRecoveryFlow ? 'recovery' : isFavoritesFlow ? 'favorites' : 'none'}
-                onTabChange={handleTabChange}
-                onHome={navigateHome}
-                onFavorites={() => setScreen({ type: 'favorites' })}
-              />
-            )}
-          </div>
-        </MotionProvider>
-      </FavoritesProvider>
+      <ThemeProvider>
+        <FavoritesProvider>
+          <MotionProvider>
+            <div className="min-h-screen bg-background transition-colors duration-300" role="application" aria-label="Pausenknopf App">
+              <AnimatePresence mode="wait">
+                {renderScreen()}
+              </AnimatePresence>
+              {showBottomNav && (
+                <BottomNav
+                  currentTab={isExercisesFlow ? 'exercises' : isRecoveryFlow ? 'recovery' : isFavoritesFlow ? 'favorites' : 'none'}
+                  onTabChange={handleTabChange}
+                  onHome={navigateHome}
+                  onFavorites={() => setScreen({ type: 'favorites' })}
+                />
+              )}
+            </div>
+          </MotionProvider>
+        </FavoritesProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
@@ -319,7 +403,6 @@ function StartScreen({
   onImpressum: () => void;
   onDatenschutz: () => void;
 }) {
-
   // Floating blobs animation
   const floatingBlobs = [
     { color: '#6B9BD1', size: 60, delay: 0, x: '10%', y: '15%' },
@@ -337,13 +420,7 @@ function StartScreen({
       className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden"
       role="main"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-30"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage opacity="opacity-30" />
 
       {/* Floating decorative blobs */}
       {floatingBlobs.map((blob, index) => (
@@ -371,15 +448,15 @@ function StartScreen({
       ))}
 
       {/* Content */}
-      <div className="max-w-md w-full text-center space-y-6 relative z-10 pb-40">
+      <div className="max-w-md w-full text-center space-y-4 relative z-10 pb-40">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.6 }}
-          className="flex justify-center mb-4"
+          className="flex justify-center mb-0"
         >
-          <img src={logoSvg} alt="Pausenknopf Logo" className="w-44 h-44" />
+          <img src={logoSvg} alt="Pausenknopf Logo" className="w-44 h-44 dark:invert transition-all duration-300" />
         </motion.div>
 
         {/* Tagline */}
@@ -387,10 +464,25 @@ function StartScreen({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-black text-lg leading-relaxed px-4"
+          className="text-black dark:text-white text-lg leading-relaxed px-4 mb-12 -mt-6"
           style={{ letterSpacing: '0.01em' }}
         >
           Für Momente, die gerade viel sind
+        </motion.div>
+
+        {/* Tagesaffirmation */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.6 }}
+          className="px-8 text-center mb-12"
+        >
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2 uppercase tracking-wider" style={{ letterSpacing: '0.1em' }}>
+            Deine Affirmation heute
+          </p>
+          <p className="text-base text-black dark:text-white leading-relaxed" style={{ letterSpacing: '0.01em' }}>
+            {getDailyAffirmation().text}
+          </p>
         </motion.div>
 
         {/* Main Content */}
@@ -398,126 +490,105 @@ function StartScreen({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="space-y-6 pt-4"
+          className="space-y-3"
         >
-          {/* Panik Button - mit Gradient und pulsierendem Ring */}
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            whileHover={{ scale: 1.05, y: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onSOS}
-            className="w-full py-10 px-8 bg-gradient-to-br from-[#D97850] to-[#c76942] text-white rounded-3xl shadow-2xl relative overflow-hidden group"
-            aria-label="Panik Button - Schnelle Atemübung"
-          >
-            {/* Pulsierender Ring */}
-            <motion.div
-              animate={{
-                scale: [1, 1.3, 1],
-                opacity: [0.5, 0, 0.5]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute inset-0 rounded-3xl border-4 border-white"
-            />
-
-            {/* Subtiler Glanz-Effekt */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent group-hover:via-white/20 transition-all duration-500" />
-
-            <div className="space-y-3 relative text-center">
-              <p className="text-4xl" style={{ letterSpacing: '0.02em' }}>Panik-Button</p>
-              <p className="text-base opacity-90" style={{ letterSpacing: '0.01em' }}>Schnelle Atemübung</p>
-            </div>
-          </motion.button>
-
-          {/* Schnellzugriff Kategorien - Tags */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="flex flex-wrap gap-2 justify-center px-4"
-          >
-            {categories.slice(0, 6).map((category, index) => (
-              <motion.button
-                key={category.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.55 + index * 0.05, duration: 0.4 }}
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onSelectCategory(category.id)}
-                className={`${category.colorClass} px-4 py-2 rounded-full text-xs shadow-md hover:shadow-lg transition-all`}
-                style={{ letterSpacing: '0.01em' }}
-              >
-                {category.keyword}
-              </motion.button>
-            ))}
-          </motion.div>
-
-          {/* Hauptnavigation - mit Cards */}
+          {/* Hauptnavigation - 2x2 Grid */}
           <div className="grid grid-cols-2 gap-3">
             <motion.button
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-              whileHover={{ scale: 1.03, y: -4 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={onExercises}
-              className="py-8 px-6 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-black/10 relative overflow-hidden group"
+              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
+              style={{ borderLeftColor: '#6B9BD1' }}
               aria-label="Was hilft jetzt?"
             >
-              {/* Solid Color Accent */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#D97850] group-hover:opacity-100 transition-opacity" />
-
-              <div className="space-y-2 text-left">
-                <p className="text-xl text-black" style={{ letterSpacing: '0.01em' }}>Was hilft jetzt?</p>
-                <p className="text-xs text-neutral-600" style={{ letterSpacing: '0.01em' }}>Übungen für den Moment</p>
+              <div className="space-y-1 text-left">
+                <p className="text-base text-black dark:text-white" style={{ letterSpacing: '0.01em' }}>Was hilft jetzt?</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-light" style={{ letterSpacing: '0.01em' }}>Übungen für den Moment</p>
               </div>
             </motion.button>
 
             <motion.button
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.75, duration: 0.5 }}
-              whileHover={{ scale: 1.03, y: -4 }}
+              transition={{ delay: 0.45, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={onRecovery}
-              className="py-8 px-6 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-black/10 relative overflow-hidden group"
+              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
+              style={{ borderLeftColor: '#E5C5B5' }}
               aria-label="Was fehlt mir?"
             >
-              {/* Solid Color Accent */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#E5C5B5] group-hover:opacity-100 transition-opacity" />
+              <div className="space-y-1 text-left">
+                <p className="text-base text-black dark:text-white" style={{ letterSpacing: '0.01em' }}>Was fehlt mir?</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-light" style={{ letterSpacing: '0.01em' }}>Finde deine Erholung</p>
+              </div>
+            </motion.button>
 
-              <div className="space-y-2 text-left">
-                <p className="text-xl text-black" style={{ letterSpacing: '0.01em' }}>Was fehlt mir?</p>
-                <p className="text-xs text-neutral-600" style={{ letterSpacing: '0.01em' }}>Finde deine Erholung</p>
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onSituations}
+              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
+              style={{ borderLeftColor: '#F4A261' }}
+              aria-label="Wie fühlst du dich?"
+            >
+              <div className="space-y-1 text-left">
+                <p className="text-base text-black dark:text-white" style={{ letterSpacing: '0.01em' }}>Wie fühlst du dich?</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-light" style={{ letterSpacing: '0.01em' }}>Finde Übungen nach Situation</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onSOS}
+              className="py-5 px-4 bg-[#D97850] dark:bg-[#E08860] text-white rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4"
+              style={{ borderLeftColor: '#c76942' }}
+              aria-label="Panik Button - Schnelle Atemübung"
+            >
+              <div className="space-y-1 text-left">
+                <p className="text-base text-white" style={{ letterSpacing: '0.01em' }}>Panik-Button</p>
+                <p className="text-xs text-white/90 font-light" style={{ letterSpacing: '0.01em' }}>Schnelle Atemübung</p>
               </div>
             </motion.button>
           </div>
 
-          {/* Situations Button - full width */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            whileHover={{ scale: 1.03, y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onSituations}
-            className="w-full py-8 px-6 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-black/10 relative overflow-hidden group"
-            aria-label="Wie fühlst du dich?"
+          {/* Kategorie Keywords */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="flex flex-wrap justify-center gap-2 pt-2"
           >
-            {/* Solid Color Accent */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#F4A261] group-hover:opacity-100 transition-opacity" />
-
-            <div className="space-y-2 text-center">
-              <p className="text-xl text-black" style={{ letterSpacing: '0.01em' }}>Wie fühlst du dich?</p>
-              <p className="text-xs text-neutral-600" style={{ letterSpacing: '0.01em' }}>Finde Übungen nach Situation</p>
-            </div>
-          </motion.button>
+            {categories.map((category, index) => (
+              <motion.button
+                key={category.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + index * 0.05, duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onSelectCategory(category.id)}
+                className="px-3 py-1.5 rounded-full text-xs text-black dark:text-white shadow-sm hover:shadow-md transition-all"
+                style={{
+                  backgroundColor: `${category.color}99`
+                }}
+                aria-label={`Kategorie ${category.keyword}`}
+              >
+                {category.keyword}
+              </motion.button>
+            ))}
+          </motion.div>
         </motion.div>
       </div>
 
@@ -528,23 +599,21 @@ function StartScreen({
         transition={{ delay: 0.7, duration: 0.6 }}
         className="absolute bottom-28 left-0 right-0 px-6"
       >
-        <div className="max-w-md mx-auto space-y-3">
-          <div className="text-center">
-            <p className="text-[10px] text-black font-bold uppercase" style={{ letterSpacing: '0.01em' }}>
-              mit liebe entwickelt von Julia Reuter für dich {'<3'}
-            </p>
-          </div>
-          <div className="flex justify-center gap-4 text-[8px] text-neutral-500">
+        <div className="max-w-md mx-auto text-center space-y-1">
+          <p className="text-[8px] text-neutral-500 dark:text-neutral-400" style={{ letterSpacing: '0.01em' }}>
+            mit liebe entwickelt von Julia Reuter für dich {'<3'}
+          </p>
+          <div className="flex justify-center gap-2 text-[8px] text-neutral-500 dark:text-neutral-400">
             <button
               onClick={onImpressum}
-              className="hover:text-neutral-700 transition-colors"
+              className="hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
             >
               Impressum
             </button>
             <span>·</span>
             <button
               onClick={onDatenschutz}
-              className="hover:text-neutral-700 transition-colors"
+              className="hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
             >
               Datenschutz
             </button>
@@ -572,8 +641,8 @@ function SearchInput({
       className="relative"
     >
       <Search
-        size={20}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+        size={22}
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/60 pointer-events-none z-10"
       />
       <input
         type="text"
@@ -599,11 +668,13 @@ function SearchInput({
 function SearchResults({
   results,
   onSelectCard,
-  searchQuery
+  searchQuery,
+  isDarkMode
 }: {
   results: Card[];
   onSelectCard: (cardId: string) => void;
   searchQuery: string;
+  isDarkMode: boolean;
 }) {
   if (results.length === 0) {
     return (
@@ -638,6 +709,7 @@ function SearchResults({
       </motion.p>
       {results.map((card, index) => {
         const category = categories.find(c => c.id === card.categoryId);
+        const borderColor = category ? getCategoryColor(category.id, isDarkMode) : '#000';
         return (
           <motion.button
             key={card.id}
@@ -647,21 +719,21 @@ function SearchResults({
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelectCard(card.id)}
-            className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200"
-            style={{ borderLeftWidth: '4px', borderLeftColor: category?.color || '#000' }}
+            className="w-full p-6 bg-white/75 dark:bg-white/10 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200 dark:border-white/20"
+            style={{ borderLeftWidth: '4px', borderLeftColor: borderColor }}
             aria-label={`Karte ${card.title} öffnen`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span
-                    className="text-xs px-2 py-1 rounded-full"
+                    className="text-xs px-2 py-1 rounded-full dark:text-white"
                     style={{ backgroundColor: `${category?.color}40`, color: category?.color }}
                   >
                     {category?.keyword}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold" style={{ letterSpacing: '0.01em' }}>
+                <h3 className="text-lg font-semibold dark:text-white" style={{ letterSpacing: '0.01em' }}>
                   {card.title}
                 </h3>
               </div>
@@ -673,7 +745,8 @@ function SearchResults({
   );
 }
 
-function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelectCategory: (categoryId: string) => void; onSelectCard: (cardId: string) => void; onHome: () => void }) {
+function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onSituations }: { onSelectCategory: (categoryId: string) => void; onSelectCard: (cardId: string) => void; onHome: () => void; onSituations: () => void }) {
+  const { actualTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -701,13 +774,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelec
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-4 flex-1 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -715,7 +782,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelec
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-3 text-center"
         >
-          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Was brauchst du gerade?</h1>
+          <h1 className="text-lg" style={{ letterSpacing: '0.02em' }}>Was brauchst du gerade?</h1>
         </motion.div>
 
         <SearchInput
@@ -724,44 +791,71 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelec
           onClear={() => setSearchQuery('')}
         />
 
-        <motion.button
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={getRandomCard}
-          className="w-full py-5 px-6 bg-black/85 text-white rounded-2xl hover:bg-black/90 active:bg-black/80 transition-all font-medium shadow-sm backdrop-blur-sm"
-          style={{ letterSpacing: '0.01em' }}
-          aria-label="Zufällige Karte auswählen"
-        >
-          Zeig mir eine zufällige Karte
-        </motion.button>
+        <div className="grid grid-cols-2 gap-3">
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.5 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={getRandomCard}
+            className="py-5 px-4 bg-black/85 dark:bg-white/20 text-white dark:text-white rounded-2xl hover:bg-black/90 dark:hover:bg-white/30 active:bg-black/80 dark:active:bg-white/25 transition-all font-medium shadow-sm backdrop-blur-sm dark:border dark:border-white/30"
+            style={{ letterSpacing: '0.01em' }}
+            aria-label="Zufällige Karte auswählen"
+          >
+            <div className="flex flex-col items-center gap-2">
+              <Shuffle size={24} />
+              <span>Zeig mir eine zufällige Karte</span>
+            </div>
+          </motion.button>
+
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onSituations}
+            className="py-5 px-4 bg-black/85 dark:bg-white/20 text-white dark:text-white rounded-2xl hover:bg-black/90 dark:hover:bg-white/30 active:bg-black/80 dark:active:bg-white/25 transition-all shadow-sm backdrop-blur-sm dark:border dark:border-white/30"
+            aria-label="Übungen nach Situation finden"
+          >
+            <div className="flex flex-col items-center gap-2">
+              <CircleHelp size={24} />
+              <div className="space-y-1">
+                <p className="font-medium" style={{ letterSpacing: '0.01em' }}>Wie fühlst du dich?</p>
+                <p className="text-xs text-white/70 dark:text-white/80" style={{ letterSpacing: '0.01em' }}>Finde Übungen für deine Situation</p>
+              </div>
+            </div>
+          </motion.button>
+        </div>
 
         {isSearching ? (
           <SearchResults
             results={searchResults}
             onSelectCard={onSelectCard}
             searchQuery={debouncedQuery}
+            isDarkMode={actualTheme === 'dark'}
           />
         ) : (
           <div className="grid grid-cols-2 gap-3 pt-4">
-            {categories.map((category, index) => (
-              <motion.button
-                key={category.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
-                whileHover={{ scale: 1.03, y: -4 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => onSelectCategory(category.id)}
-                className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm"
-                style={{ backgroundColor: `${category.color}99` }}
-                aria-label={`Kategorie ${category.name} auswählen`}
-              >
+            {categories.map((category, index) => {
+              const themeColor = getCategoryColor(category.id, actualTheme === 'dark');
+              return (
+                <motion.button
+                  key={category.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
+                  whileHover={{ scale: 1.03, y: -4 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => onSelectCategory(category.id)}
+                  className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm dark:border dark:border-white/20"
+                  style={{ backgroundColor: `${themeColor}99` }}
+                  aria-label={`Kategorie ${category.name} auswählen`}
+                >
                 <div className="space-y-2 w-full text-center flex flex-col items-center justify-center px-2">
                   <h3
-                    className="text-xl font-serif text-neutral-900 break-words"
+                    className="text-xl font-serif text-neutral-900 dark:text-white break-words"
                     style={{
                       fontFamily: 'Rufina, serif',
                       letterSpacing: '0.02em'
@@ -769,19 +863,20 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelec
                   >
                     {category.keyword}
                   </h3>
-                  <p className="text-sm text-neutral-900 leading-snug break-words" style={{ letterSpacing: '0.01em' }}>
+                  <p className="text-sm text-neutral-900 dark:text-white leading-snug break-words" style={{ letterSpacing: '0.01em' }}>
                     {category.shortDescription}
                   </p>
                   <div className="flex flex-wrap gap-1.5 justify-center mt-3 w-full">
                     {category.badgeLabels.map((badge) => (
-                      <span key={badge} className="text-xs text-neutral-900 px-2 py-1 bg-white/70 rounded-full backdrop-blur-sm break-words font-medium">
+                      <span key={badge} className="text-xs text-neutral-900 dark:text-white px-2 py-1 bg-white/70 dark:bg-white/20 rounded-full backdrop-blur-sm break-words font-medium">
                         {badge}
                       </span>
                     ))}
                   </div>
                 </div>
               </motion.button>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -801,6 +896,7 @@ function CategoryScreen({
   onBack: () => void;
   onHome: () => void;
 }) {
+  const { actualTheme } = useTheme();
   const category = categories.find(c => c.id === categoryId);
   const categoryCards = cards.filter(c => c.categoryId === categoryId);
 
@@ -829,23 +925,18 @@ function CategoryScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className={`${category.colorClass} text-white px-6 py-8 relative z-10`}
+        className="text-white px-6 py-8 relative z-10"
+        style={{ backgroundColor: getCategoryColor(category.id, actualTheme === 'dark') }}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <p className="text-sm opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
-          <h2 className="text-4xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
-          <p className="opacity-90 leading-relaxed">{category.description}</p>
+          <p className="text-[10px] opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
+          <h2 className="text-2xl text-black" style={{ letterSpacing: '0.02em' }}>{category.name}</h2>
+          <p className="text-sm opacity-90 leading-relaxed">{category.description}</p>
         </div>
       </motion.div>
 
@@ -859,10 +950,10 @@ function CategoryScreen({
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelectCard(card.id)}
-            className="w-full py-8 px-8 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-center border border-neutral-200"
+            className="w-full py-6 px-6 bg-white/75 dark:bg-white/10 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-center border border-neutral-200 dark:border-white/20"
             aria-label={`Karte ${card.title} öffnen`}
           >
-            <h3 className="text-lg" style={{ letterSpacing: '0.01em' }}>{card.title}</h3>
+            <h3 className="text-base dark:text-white" style={{ letterSpacing: '0.01em' }}>{card.title}</h3>
           </motion.button>
         ))}
 
@@ -1047,7 +1138,7 @@ function BreathingCircle() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <p className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+        <p className="text-xl text-neutral-800" style={{ letterSpacing: '0.02em' }}>
           {phaseText[breathPhase]}
         </p>
       </motion.div>
@@ -1056,12 +1147,13 @@ function BreathingCircle() {
 }
 
 function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: string; onBack: () => void; onRandomCard: () => void; onHome: () => void }) {
+  const { actualTheme } = useTheme();
   const card = cards.find(c => c.id === cardId);
   const category = card ? categories.find(c => c.id === card.categoryId) : null;
   const { isFavorite, toggleFavorite } = useFavoritesContext();
 
-  // Prüfe ob es eine Atemübung ist (Kategorie "blau")
-  const isBreathingExercise = category?.id === 'blau';
+  // Prüfe ob es eine Atemübung ist (Kategorie "blau" aber nicht "Innerer sicherer Ort")
+  const isBreathingExercise = category?.id === 'blau' && !card.id.includes('innerer-ort');
 
   if (!card || !category) {
     return (
@@ -1088,23 +1180,36 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: st
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className={`${category.colorClass} px-6 py-6 relative z-10`}
+        className="px-6 py-6 relative z-10"
+        style={{ backgroundColor: getCategoryColor(category.id, actualTheme === 'dark') }}
       >
         <div className="max-w-md mx-auto space-y-2">
-          <p className="text-white text-sm opacity-90">{category.label.split(' – ')[1] || category.label}</p>
+          <p className="text-white text-[10px] opacity-90">{category.label.split(' – ')[1] || category.label}</p>
         </div>
       </motion.div>
+
+      <div className="px-6 pt-4 relative z-10">
+        <div className="max-w-md mx-auto">
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            whileHover={{ x: -4 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onBack}
+            className="py-2 px-4 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors flex items-center gap-2"
+            aria-label="Zurück"
+          >
+            <span>←</span>
+            <span>Zurück</span>
+          </motion.button>
+        </div>
+      </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative z-10">
         <div className="max-w-md w-full space-y-8">
@@ -1113,7 +1218,7 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: st
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-2xl text-center"
+              className="text-xl text-center"
               style={{ letterSpacing: '0.02em' }}
             >
               {card.title}
@@ -1137,7 +1242,7 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: st
             transition={{ delay: 0.4, duration: 0.8 }}
             className="space-y-4"
           >
-            <p className="text-lg whitespace-pre-line leading-loose text-neutral-700" style={{ letterSpacing: '0.01em' }}>
+            <p className="text-sm whitespace-pre-line leading-relaxed text-neutral-700" style={{ letterSpacing: '0.01em' }}>
               {card.text}
             </p>
           </motion.div>
@@ -1193,15 +1298,6 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: st
               <Shuffle size={20} />
             </motion.button>
           </div>
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onBack}
-            className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center"
-            aria-label="Zurück"
-          >
-            ← Zurück
-          </motion.button>
         </div>
       </motion.div>
     </motion.div>
@@ -1217,13 +1313,7 @@ function ImpressumScreen({ onBack, onHome }: { onBack: () => void; onHome: () =>
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-6 relative z-10">
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
@@ -1238,13 +1328,13 @@ function ImpressumScreen({ onBack, onHome }: { onBack: () => void; onHome: () =>
           <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
         </motion.button>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-3 text-center"
         >
-          <h2 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Impressum</h2>
+          <h2 className="text-lg" style={{ letterSpacing: '0.02em' }}>Impressum</h2>
         </motion.div>
 
         <motion.div 
@@ -1306,13 +1396,7 @@ function DatenschutzScreen({ onBack, onHome }: { onBack: () => void; onHome: () 
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-6 relative z-10">
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
@@ -1327,13 +1411,13 @@ function DatenschutzScreen({ onBack, onHome }: { onBack: () => void; onHome: () 
           <img src={logoSvg} alt="Pausenknopf Logo" className="w-16 h-16" />
         </motion.button>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-3 text-center"
         >
-          <h2 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Datenschutz</h2>
+          <h2 className="text-lg" style={{ letterSpacing: '0.02em' }}>Datenschutz</h2>
         </motion.div>
 
         <motion.div 
@@ -1417,13 +1501,7 @@ function RecoveryTypesScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-4 flex-1 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -1431,7 +1509,7 @@ function RecoveryTypesScreen({
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-3 text-center"
         >
-          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Welche Art von Erholung brauchst du?</h1>
+          <h1 className="text-lg" style={{ letterSpacing: '0.02em' }}>Welche Art von Erholung brauchst du?</h1>
         </motion.div>
 
         <motion.button
@@ -1457,13 +1535,13 @@ function RecoveryTypesScreen({
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectRecovery(recovery.id)}
-              className="w-full rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm p-8 backdrop-blur-sm"
+              className="w-full rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm p-6 backdrop-blur-sm"
               style={{ backgroundColor: `${recovery.color}99` }}
               aria-label={`${recovery.name} auswählen`}
             >
-              <div className="space-y-3 text-center">
+              <div className="space-y-2 text-center">
                 <h2
-                  className="text-2xl font-serif text-neutral-900"
+                  className="text-lg font-serif text-neutral-900"
                   style={{
                     fontFamily: 'Rufina, serif',
                     letterSpacing: '0.02em'
@@ -1471,7 +1549,7 @@ function RecoveryTypesScreen({
                 >
                   {recovery.name}
                 </h2>
-                <p className="text-sm text-neutral-900 leading-snug" style={{ letterSpacing: '0.01em' }}>
+                <p className="text-xs text-neutral-900 leading-snug" style={{ letterSpacing: '0.01em' }}>
                   {recovery.shortDescription}
                 </p>
               </div>
@@ -1521,13 +1599,7 @@ function RecoveryDetailScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1535,7 +1607,7 @@ function RecoveryDetailScreen({
         className={`${recovery.colorClass} px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <h2 className="text-3xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
+          <h2 className="text-xl text-black" style={{ letterSpacing: '0.02em' }}>{recovery.title}</h2>
         </div>
       </motion.div>
 
@@ -1546,8 +1618,8 @@ function RecoveryDetailScreen({
           transition={{ delay: 0.2, duration: 0.6 }}
           className="space-y-4"
         >
-          <h3 className="text-xl font-medium" style={{ letterSpacing: '0.01em' }}>Mögliche Anzeichen:</h3>
-          <ul className="space-y-2 list-disc list-inside text-neutral-700">
+          <h3 className="text-base" style={{ letterSpacing: '0.01em' }}>Mögliche Anzeichen:</h3>
+          <ul className="space-y-2 list-disc list-inside text-neutral-700 text-sm">
             {recovery.signs.map((sign, index) => (
               <li key={index} style={{ letterSpacing: '0.01em' }}>{sign}</li>
             ))}
@@ -1560,8 +1632,8 @@ function RecoveryDetailScreen({
           transition={{ delay: 0.4, duration: 0.6 }}
           className="space-y-4"
         >
-          <h3 className="text-xl font-medium" style={{ letterSpacing: '0.01em' }}>Was dir helfen könnte:</h3>
-          <ul className="space-y-2 list-disc list-inside text-neutral-700">
+          <h3 className="text-base" style={{ letterSpacing: '0.01em' }}>Was dir helfen könnte:</h3>
+          <ul className="space-y-2 list-disc list-inside text-neutral-700 text-sm">
             {recovery.helps.map((help, index) => (
               <li key={index} style={{ letterSpacing: '0.01em' }}>{help}</li>
             ))}
@@ -1617,13 +1689,7 @@ function SituationsScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-4 flex-1 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -1631,8 +1697,8 @@ function SituationsScreen({
           transition={{ delay: 0.2, duration: 0.5 }}
           className="space-y-3 text-center"
         >
-          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Wie fühlst du dich gerade?</h1>
-          <p className="text-sm text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+          <h1 className="text-lg" style={{ letterSpacing: '0.02em' }}>Wie fühlst du dich gerade?</h1>
+          <p className="text-[10px] text-neutral-600" style={{ letterSpacing: '0.01em' }}>
             Wähle die Situation, die am besten passt
           </p>
         </motion.div>
@@ -1648,13 +1714,13 @@ function SituationsScreen({
                 whileHover={{ scale: 1.03, y: -4 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => onSelectSituation(situation.id)}
-                className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm"
+                className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-5 text-center backdrop-blur-sm"
                 style={{ backgroundColor: `${situation.color}99` }}
                 aria-label={`${situation.name} auswählen`}
               >
                 <div className="space-y-2 w-full text-center flex flex-col items-center justify-center">
                   <h3
-                    className="text-lg font-medium text-neutral-900 break-words"
+                    className="text-base text-neutral-900 break-words"
                     style={{ letterSpacing: '0.01em' }}
                   >
                     {situation.name}
@@ -1721,13 +1787,7 @@ function SituationResultScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1735,8 +1795,8 @@ function SituationResultScreen({
         className={`${situation.colorClass} text-white px-6 py-8 relative z-10`}
       >
         <div className="max-w-md mx-auto space-y-3">
-          <h2 className="text-3xl text-center text-black" style={{ letterSpacing: '0.02em' }}>{situation.name}</h2>
-          <p className="text-center text-black/80 leading-relaxed" style={{ letterSpacing: '0.01em' }}>
+          <h2 className="text-xl text-center text-black" style={{ letterSpacing: '0.02em' }}>{situation.name}</h2>
+          <p className="text-sm text-center text-black/80 leading-relaxed" style={{ letterSpacing: '0.01em' }}>
             {situation.description}
           </p>
         </div>
@@ -1841,13 +1901,7 @@ function QuestionnaireScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-8 flex-1 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -1855,8 +1909,8 @@ function QuestionnaireScreen({
           transition={{ delay: 0.1, duration: 0.5 }}
           className="space-y-4"
         >
-          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Welche Anzeichen treffen auf dich zu?</h1>
-          <p className="text-sm text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+          <h1 className="text-lg" style={{ letterSpacing: '0.02em' }}>Welche Anzeichen treffen auf dich zu?</h1>
+          <p className="text-[10px] text-neutral-600" style={{ letterSpacing: '0.01em' }}>
             Wähle alle aus, die du gerade bei dir bemerkst
           </p>
         </motion.div>
@@ -1960,13 +2014,7 @@ function QuestionnaireResultScreen({
       transition={{ duration: 0.4, ease: "easeInOut" }}
       className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage: `url(${backgroundStart})`
-        }}
-      />
+      <BackgroundImage />
       <div className="max-w-md w-full mx-auto space-y-8 flex-1 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -1974,7 +2022,7 @@ function QuestionnaireResultScreen({
           transition={{ delay: 0.1, duration: 0.5 }}
           className="space-y-4 text-center"
         >
-          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Dein Ergebnis</h1>
+          <h1 className="text-lg" style={{ letterSpacing: '0.02em' }}>Dein Ergebnis</h1>
         </motion.div>
 
         {bestMatch.matchCount > 0 ? (
@@ -1984,11 +2032,11 @@ function QuestionnaireResultScreen({
             transition={{ delay: 0.2, duration: 0.5 }}
             className="space-y-6"
           >
-            <div className={`${bestMatch.recovery.colorClass} rounded-2xl p-8 space-y-4`}>
-              <h2 className="text-2xl font-serif text-neutral-900" style={{ fontFamily: 'Rufina, serif', letterSpacing: '0.02em' }}>
+            <div className={`${bestMatch.recovery.colorClass} rounded-2xl p-6 space-y-3`}>
+              <h2 className="text-lg font-serif text-neutral-900" style={{ fontFamily: 'Rufina, serif', letterSpacing: '0.02em' }}>
                 {bestMatch.recovery.name}
               </h2>
-              <p className="text-neutral-900 leading-relaxed" style={{ letterSpacing: '0.01em' }}>
+              <p className="text-sm text-neutral-900 leading-relaxed" style={{ letterSpacing: '0.01em' }}>
                 {bestMatch.matchCount} von {bestMatch.recovery.signs.length} Anzeichen treffen auf dich zu.
               </p>
               <motion.button
@@ -2003,9 +2051,9 @@ function QuestionnaireResultScreen({
             </div>
 
             {sortedScores.filter(s => s.matchCount > 0 && s.recovery.id !== bestMatch.recovery.id).map((score) => (
-              <div key={score.recovery.id} className={`${score.recovery.colorClass} rounded-2xl p-6 space-y-3 opacity-80`}>
-                <h3 className="text-lg font-medium" style={{ letterSpacing: '0.01em' }}>{score.recovery.name}</h3>
-                <p className="text-sm text-neutral-800" style={{ letterSpacing: '0.01em' }}>
+              <div key={score.recovery.id} className={`${score.recovery.colorClass} rounded-2xl p-5 space-y-2 opacity-80`}>
+                <h3 className="text-base" style={{ letterSpacing: '0.01em' }}>{score.recovery.name}</h3>
+                <p className="text-xs text-neutral-800" style={{ letterSpacing: '0.01em' }}>
                   {score.matchCount} von {score.recovery.signs.length} Anzeichen
                 </p>
                 <button
@@ -2131,12 +2179,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden"
       >
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{
-            backgroundImage: `url(${backgroundStart})`
-          }}
-        />
+        <BackgroundImage opacity="opacity-20" />
 
         <div className="max-w-md w-full mx-auto space-y-8 flex-1 relative z-10 flex flex-col justify-center pb-32">
           <motion.div
@@ -2145,10 +2188,10 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
             transition={{ delay: 0.1, duration: 0.5 }}
             className="text-center space-y-3"
           >
-            <h1 className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+            <h1 className="text-lg text-neutral-800" style={{ letterSpacing: '0.02em' }}>
               5-4-3-2-1 Technik
             </h1>
-            <p className="text-sm text-neutral-600">Nimm dir Zeit für jeden Schritt</p>
+            <p className="text-[10px] text-neutral-600">Nimm dir Zeit für jeden Schritt</p>
           </motion.div>
 
           <motion.div
@@ -2157,43 +2200,43 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
             transition={{ delay: 0.2, duration: 0.6 }}
             className="space-y-6"
           >
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
               <div className="space-y-2">
-                <p className="text-2xl font-bold text-[#8FB89C]">5</p>
-                <p className="text-neutral-800 font-medium">Nenne 5 Dinge, die du sehen kannst</p>
-                <p className="text-sm text-neutral-600">Schau dich um. Was siehst du?</p>
+                <p className="text-xl text-[#8FB89C]">5</p>
+                <p className="text-neutral-800 text-sm">Nenne 5 Dinge, die du sehen kannst</p>
+                <p className="text-xs text-neutral-600">Schau dich um. Was siehst du?</p>
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
               <div className="space-y-2">
-                <p className="text-2xl font-bold text-[#8FB89C]">4</p>
-                <p className="text-neutral-800 font-medium">Nenne 4 Dinge, die du berühren kannst</p>
-                <p className="text-sm text-neutral-600">Spüre die Textur, die Temperatur</p>
+                <p className="text-xl text-[#8FB89C]">4</p>
+                <p className="text-neutral-800 text-sm">Nenne 4 Dinge, die du berühren kannst</p>
+                <p className="text-xs text-neutral-600">Spüre die Textur, die Temperatur</p>
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
               <div className="space-y-2">
-                <p className="text-2xl font-bold text-[#8FB89C]">3</p>
-                <p className="text-neutral-800 font-medium">Nenne 3 Dinge, die du hören kannst</p>
-                <p className="text-sm text-neutral-600">Lausche auf Geräusche um dich herum</p>
+                <p className="text-xl text-[#8FB89C]">3</p>
+                <p className="text-neutral-800 text-sm">Nenne 3 Dinge, die du hören kannst</p>
+                <p className="text-xs text-neutral-600">Lausche auf Geräusche um dich herum</p>
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
               <div className="space-y-2">
-                <p className="text-2xl font-bold text-[#8FB89C]">2</p>
-                <p className="text-neutral-800 font-medium">Nenne 2 Dinge, die du riechen kannst</p>
-                <p className="text-sm text-neutral-600">Was kannst du wahrnehmen?</p>
+                <p className="text-xl text-[#8FB89C]">2</p>
+                <p className="text-neutral-800 text-sm">Nenne 2 Dinge, die du riechen kannst</p>
+                <p className="text-xs text-neutral-600">Was kannst du wahrnehmen?</p>
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
               <div className="space-y-2">
-                <p className="text-2xl font-bold text-[#8FB89C]">1</p>
-                <p className="text-neutral-800 font-medium">Nenne 1 Ding, das du schmecken kannst</p>
-                <p className="text-sm text-neutral-600">Vielleicht ein Getränk oder Essen?</p>
+                <p className="text-xl text-[#8FB89C]">1</p>
+                <p className="text-neutral-800 text-sm">Nenne 1 Ding, das du schmecken kannst</p>
+                <p className="text-xs text-neutral-600">Vielleicht ein Getränk oder Essen?</p>
               </div>
             </div>
           </motion.div>
@@ -2248,10 +2291,10 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
           transition={{ delay: 0.1, duration: 0.5 }}
           className="text-center space-y-3"
         >
-          <h1 className="text-2xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+          <h1 className="text-lg text-neutral-800" style={{ letterSpacing: '0.02em' }}>
             Atme mit mir
           </h1>
-          <p className="text-sm text-neutral-600 leading-relaxed px-4" style={{ letterSpacing: '0.01em' }}>
+          <p className="text-[10px] text-neutral-600 leading-relaxed px-4" style={{ letterSpacing: '0.01em' }}>
             4 Sekunden durch die Nase einatmen · 7 Sekunden Luft anhalten · 8 Sekunden zischend durch den Mund ausatmen
           </p>
         </motion.div>
@@ -2276,7 +2319,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <p className="text-4xl font-bold text-neutral-800" style={{ letterSpacing: '0.02em' }}>
+            <p className="text-2xl text-neutral-800" style={{ letterSpacing: '0.02em' }}>
               {phaseText[breathPhase]}
             </p>
           </motion.div>
@@ -2393,7 +2436,7 @@ function FavoritesScreen({
       className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
     >
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
+        className="absolute inset-0 bg-cover bg-center opacity-25 dark:opacity-10 transition-opacity duration-300"
         style={{
           backgroundImage: `url(${backgroundStart})`
         }}
@@ -2407,10 +2450,10 @@ function FavoritesScreen({
           className="space-y-3 text-center"
         >
           <div className="flex items-center justify-center gap-2">
-            <Heart size={32} className="text-neutral-600" />
-            <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Meine Favoriten</h1>
+            <Heart size={24} className="text-neutral-600" />
+            <h1 className="text-lg" style={{ letterSpacing: '0.02em' }}>Meine Favoriten</h1>
           </div>
-          <p className="text-sm text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+          <p className="text-[10px] text-neutral-600" style={{ letterSpacing: '0.01em' }}>
             {favoriteCards.length} {favoriteCards.length === 1 ? 'Karte' : 'Karten'} gespeichert
           </p>
         </motion.div>

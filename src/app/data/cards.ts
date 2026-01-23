@@ -740,3 +740,42 @@ export const situations: Situation[] = [
     relevantCardIds: ['blau-4', 'orange-2', 'orange-5', 'koralle-2', 'koralle-6', 'gruen-6']
   }
 ];
+
+export type Affirmation = {
+  id: string;
+  text: string;
+};
+
+export const affirmations: Affirmation[] = [
+  { id: 'aff-1', text: 'Du bist genug, genau so wie du bist.' },
+  { id: 'aff-2', text: 'Du darfst Fehler machen. Das macht dich menschlich.' },
+  { id: 'aff-3', text: 'Es ist okay, nicht okay zu sein.' },
+  { id: 'aff-4', text: 'Du machst das richtig. Jeder Schritt zählt.' },
+  { id: 'aff-5', text: 'Du bist nicht allein mit dem, was du fühlst.' },
+  { id: 'aff-6', text: 'Du darfst dir Zeit nehmen. Es gibt kein "zu langsam".' },
+  { id: 'aff-7', text: 'Deine Gefühle sind gültig und wichtig.' },
+  { id: 'aff-8', text: 'Du verdienst Ruhe und Fürsorge.' },
+  { id: 'aff-9', text: 'Jeder Tag ist eine neue Chance.' },
+  { id: 'aff-10', text: 'Du bist stärker, als du denkst.' },
+  { id: 'aff-11', text: 'Es ist mutig, um Hilfe zu bitten.' },
+  { id: 'aff-12', text: 'Du darfst stolz auf dich sein.' },
+  { id: 'aff-13', text: 'Kleine Schritte sind auch Schritte.' },
+  { id: 'aff-14', text: 'Du musst nicht perfekt sein.' },
+  { id: 'aff-15', text: 'Du hast das Recht, Grenzen zu setzen.' },
+  { id: 'aff-16', text: 'Du darfst dich ausruhen, ohne es verdienen zu müssen.' },
+  { id: 'aff-17', text: 'Deine Bedürfnisse sind wichtig.' },
+  { id: 'aff-18', text: 'Es ist okay, nicht alles zu schaffen.' },
+  { id: 'aff-19', text: 'Du bist wertvoll, unabhängig von deiner Leistung.' },
+  { id: 'aff-20', text: 'Du darfst dir selbst verzeihen.' },
+  { id: 'aff-21', text: 'Dein Tempo ist genau richtig.' },
+  { id: 'aff-22', text: 'Du darfst Nein sagen.' },
+  { id: 'aff-23', text: 'Heute ist genug. Du bist genug.' },
+  { id: 'aff-24', text: 'Du hast schon so viel geschafft.' },
+  { id: 'aff-25', text: 'Es ist okay, sich zu schonen.' },
+  { id: 'aff-26', text: 'Du darfst sanft mit dir selbst sein.' },
+  { id: 'aff-27', text: 'Deine Geschichte ist wichtig.' },
+  { id: 'aff-28', text: 'Du verdienst Liebe und Respekt – auch von dir selbst.' },
+  { id: 'aff-29', text: 'Manchmal ist "Durchhalten" schon ein Erfolg.' },
+  { id: 'aff-30', text: 'Du bist mehr als deine Ängste.' },
+  { id: 'aff-31', text: 'Jeder Atemzug ist ein Neuanfang.' }
+];
