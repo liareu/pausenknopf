@@ -1,14 +1,50 @@
-import { useState, useEffect } from 'react';
-import { categories, cards, Category, Card, recoveryTypes, RecoveryType } from './data/cards';
+import { useState, useEffect, useRef } from 'react';
+import { categories, cards, Category, Card, recoveryTypes, RecoveryType, situations, Situation } from './data/cards';
 import { motion, AnimatePresence } from 'motion/react';
 import backgroundImage from '../assets/background-optimized.jpg';
 import backgroundStart from '../assets/background-start.jpg';
 import logoSvg from '../assets/logo.svg';
 import knopfSvg from '../assets/knopf.svg';
+import innererSichererOrtAudio from '../assets/innerer-sicherer-ort.m4a';
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+// Audio files mapping
+const audioFiles: Record<string, string> = {
+  'innerer-sicherer-ort.m4a': innererSichererOrtAudio
+};
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { FavoritesProvider, useFavoritesContext } from './context/FavoritesContext';
-import { Wind, BatteryMedium, Shuffle, AlertCircle, Phone, Star, Plus, Minus, Heart, Compass, House } from 'lucide-react';
+import { Wind, BatteryMedium, Shuffle, AlertCircle, Phone, Star, Plus, Minus, Heart, Compass, House, Search, X, Moon, CloudRain, Cloud, Zap } from 'lucide-react';
+
+// Icon mapping for situations
+const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  'AlertCircle': AlertCircle,
+  'Moon': Moon,
+  'CloudRain': CloudRain,
+  'Wind': Wind,
+  'Cloud': Cloud,
+  'Zap': Zap
+};
+
+// Search utility function
+function searchCards(query: string, allCards: Card[]): Card[] {
+  if (!query.trim()) return [];
+
+  const normalizedQuery = query.toLowerCase().trim();
+
+  return allCards.filter(card => {
+    // Search in title
+    if (card.title.toLowerCase().includes(normalizedQuery)) return true;
+
+    // Search in text
+    if (card.text.toLowerCase().includes(normalizedQuery)) return true;
+
+    // Search in hashtags
+    if (card.hashtags.some(tag => tag.toLowerCase().includes(normalizedQuery))) return true;
+
+    return false;
+  });
+}
 
 function BottomNav({
   currentTab,
@@ -23,37 +59,37 @@ function BottomNav({
 }) {
   return (
     <div className="fixed bottom-6 left-0 right-0 z-50 px-6 flex justify-center">
-      <div className="bg-black rounded-full shadow-2xl px-8 py-4 flex items-center gap-8">
+      <div className="bg-black rounded-full shadow-2xl px-6 py-3 flex items-center gap-4">
         <button
           onClick={onHome}
-          className={`transition-colors ${currentTab === 'none' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'none' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
           aria-label="Zur Startseite"
         >
-          <House size={24} strokeWidth={1.5} />
+          Start
         </button>
 
         <button
           onClick={() => onTabChange('exercises')}
-          className={`transition-colors ${currentTab === 'exercises' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'exercises' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
           aria-label="Was hilft jetzt?"
         >
-          <Wind size={24} strokeWidth={1.5} />
+          Übungen
         </button>
 
         <button
           onClick={() => onTabChange('recovery')}
-          className={`transition-colors ${currentTab === 'recovery' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'recovery' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
           aria-label="Was fehlt mir?"
         >
-          <BatteryMedium size={24} strokeWidth={1.5} />
+          Erholung
         </button>
 
         <button
           onClick={onFavorites}
-          className={`transition-colors ${currentTab === 'favorites' ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
+          className={`transition-colors text-sm px-3 py-2 rounded-full ${currentTab === 'favorites' ? 'text-white bg-white/10' : 'text-neutral-400 hover:text-white'}`}
           aria-label="Meine Favoriten"
         >
-          <Heart size={24} strokeWidth={1.5} className={currentTab === 'favorites' ? 'fill-current' : ''} />
+          Favoriten
         </button>
       </div>
     </div>
@@ -65,6 +101,8 @@ type Screen =
   | { type: 'sos' }
   | { type: 'favorites' }
   | { type: 'orientation' }
+  | { type: 'situations' }
+  | { type: 'situation-result'; situationId: string }
   | { type: 'recovery-types' }
   | { type: 'recovery-detail'; recoveryId: string }
   | { type: 'questionnaire' }
@@ -125,6 +163,7 @@ export default function App() {
             onSOS={() => setScreen({ type: 'sos' })}
             onExercises={() => setScreen({ type: 'orientation' })}
             onRecovery={() => setScreen({ type: 'recovery-types' })}
+            onSituations={() => setScreen({ type: 'situations' })}
             onSelectCategory={(categoryId) => setScreen({ type: 'category', categoryId })}
             onImpressum={() => navigateTo({ type: 'impressum' })}
             onDatenschutz={() => navigateTo({ type: 'datenschutz' })}
@@ -138,6 +177,25 @@ export default function App() {
             key="favorites"
             onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
             onBack={() => setScreen({ type: 'start' })}
+            onHome={navigateHome}
+          />
+        );
+      case 'situations':
+        return (
+          <SituationsScreen
+            key="situations"
+            onSelectSituation={(situationId) => setScreen({ type: 'situation-result', situationId })}
+            onBack={() => setScreen({ type: 'start' })}
+            onHome={navigateHome}
+          />
+        );
+      case 'situation-result':
+        return (
+          <SituationResultScreen
+            key={`situation-${screen.situationId}`}
+            situationId={screen.situationId}
+            onSelectCard={(cardId) => setScreen({ type: 'card', cardId })}
+            onBack={() => setScreen({ type: 'situations' })}
             onHome={navigateHome}
           />
         );
@@ -264,6 +322,7 @@ function StartScreen({
   onSOS,
   onExercises,
   onRecovery,
+  onSituations,
   onSelectCategory,
   onImpressum,
   onDatenschutz
@@ -271,6 +330,7 @@ function StartScreen({
   onSOS: () => void;
   onExercises: () => void;
   onRecovery: () => void;
+  onSituations: () => void;
   onSelectCategory: (categoryId: string) => void;
   onImpressum: () => void;
   onDatenschutz: () => void;
@@ -454,6 +514,26 @@ function StartScreen({
               </div>
             </motion.button>
           </div>
+
+          {/* Situations Button - full width */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            whileHover={{ scale: 1.03, y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onSituations}
+            className="w-full py-8 px-6 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-black/10 relative overflow-hidden group"
+            aria-label="Wie fühlst du dich?"
+          >
+            {/* Solid Color Accent */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#F4A261] group-hover:opacity-100 transition-opacity" />
+
+            <div className="space-y-2 text-center">
+              <p className="text-xl text-black" style={{ letterSpacing: '0.01em' }}>Wie fühlst du dich?</p>
+              <p className="text-xs text-neutral-600" style={{ letterSpacing: '0.01em' }}>Finde Übungen nach Situation</p>
+            </div>
+          </motion.button>
         </motion.div>
       </div>
 
@@ -491,7 +571,139 @@ function StartScreen({
   );
 }
 
+function SearchInput({
+  value,
+  onChange,
+  onClear
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onClear: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.25, duration: 0.5 }}
+      className="relative"
+    >
+      <Search
+        size={20}
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+      />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Übungen durchsuchen..."
+        className="w-full py-4 pl-12 pr-12 bg-white/60 backdrop-blur-sm rounded-2xl shadow-sm border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-neutral-400 transition-all"
+        aria-label="Übungen durchsuchen"
+      />
+      {value && (
+        <button
+          onClick={onClear}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+          aria-label="Suche löschen"
+        >
+          <X size={20} />
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
+function SearchResults({
+  results,
+  onSelectCard,
+  searchQuery
+}: {
+  results: Card[];
+  onSelectCard: (cardId: string) => void;
+  searchQuery: string;
+}) {
+  if (results.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="flex-1 flex items-center justify-center py-12"
+      >
+        <div className="text-center space-y-4">
+          <Search size={64} className="mx-auto text-neutral-300" />
+          <p className="text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+            Keine Ergebnisse für "{searchQuery}"
+          </p>
+          <p className="text-sm text-neutral-500" style={{ letterSpacing: '0.01em' }}>
+            Versuche einen anderen Suchbegriff
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="space-y-3 pt-4">
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-sm text-neutral-600 text-center"
+        style={{ letterSpacing: '0.01em' }}
+      >
+        {results.length} {results.length === 1 ? 'Übung' : 'Übungen'} gefunden
+      </motion.p>
+      {results.map((card, index) => {
+        const category = categories.find(c => c.id === card.categoryId);
+        return (
+          <motion.button
+            key={card.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelectCard(card.id)}
+            className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200"
+            style={{ borderLeftWidth: '4px', borderLeftColor: category?.color || '#000' }}
+            aria-label={`Karte ${card.title} öffnen`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className="text-xs px-2 py-1 rounded-full"
+                    style={{ backgroundColor: `${category?.color}40`, color: category?.color }}
+                  >
+                    {category?.keyword}
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold" style={{ letterSpacing: '0.01em' }}>
+                  {card.title}
+                </h3>
+              </div>
+            </div>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
 function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelectCategory: (categoryId: string) => void; onSelectCard: (cardId: string) => void; onHome: () => void }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // Debouncing für Performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const searchResults = searchCards(debouncedQuery, cards);
+  const isSearching = debouncedQuery.trim().length > 0;
+
   const getRandomCard = () => {
     const randomCard = cards[Math.floor(Math.random() * cards.length)];
     onSelectCard(randomCard.id);
@@ -522,6 +734,12 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelec
           <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Was brauchst du gerade?</h1>
         </motion.div>
 
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onClear={() => setSearchQuery('')}
+        />
+
         <motion.button
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -536,44 +754,52 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome }: { onSelec
           Zeig mir eine zufällige Karte
         </motion.button>
 
-        <div className="grid grid-cols-2 gap-3 pt-4">
-          {categories.map((category, index) => (
-            <motion.button
-              key={category.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
-              whileHover={{ scale: 1.03, y: -4 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => onSelectCategory(category.id)}
-              className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm"
-              style={{ backgroundColor: `${category.color}99` }}
-              aria-label={`Kategorie ${category.name} auswählen`}
-            >
-              <div className="space-y-2 w-full text-center flex flex-col items-center justify-center px-2">
-                <h3
-                  className="text-xl font-serif text-neutral-900 break-words"
-                  style={{
-                    fontFamily: 'Rufina, serif',
-                    letterSpacing: '0.02em'
-                  }}
-                >
-                  {category.keyword}
-                </h3>
-                <p className="text-sm text-neutral-900 leading-snug break-words" style={{ letterSpacing: '0.01em' }}>
-                  {category.shortDescription}
-                </p>
-                <div className="flex flex-wrap gap-1.5 justify-center mt-3 w-full">
-                  {category.badgeLabels.map((badge) => (
-                    <span key={badge} className="text-xs text-neutral-900 px-2 py-1 bg-white/70 rounded-full backdrop-blur-sm break-words font-medium">
-                      {badge}
-                    </span>
-                  ))}
+        {isSearching ? (
+          <SearchResults
+            results={searchResults}
+            onSelectCard={onSelectCard}
+            searchQuery={debouncedQuery}
+          />
+        ) : (
+          <div className="grid grid-cols-2 gap-3 pt-4">
+            {categories.map((category, index) => (
+              <motion.button
+                key={category.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
+                whileHover={{ scale: 1.03, y: -4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => onSelectCategory(category.id)}
+                className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm"
+                style={{ backgroundColor: `${category.color}99` }}
+                aria-label={`Kategorie ${category.name} auswählen`}
+              >
+                <div className="space-y-2 w-full text-center flex flex-col items-center justify-center px-2">
+                  <h3
+                    className="text-xl font-serif text-neutral-900 break-words"
+                    style={{
+                      fontFamily: 'Rufina, serif',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    {category.keyword}
+                  </h3>
+                  <p className="text-sm text-neutral-900 leading-snug break-words" style={{ letterSpacing: '0.01em' }}>
+                    {category.shortDescription}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 justify-center mt-3 w-full">
+                    {category.badgeLabels.map((badge) => (
+                      <span key={badge} className="text-xs text-neutral-900 px-2 py-1 bg-white/70 rounded-full backdrop-blur-sm break-words font-medium">
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+              </motion.button>
+            ))}
+          </div>
+        )}
 
       </div>
     </motion.div>
@@ -668,6 +894,111 @@ function CategoryScreen({
         >
           ← Zurück
         </motion.button>
+      </div>
+    </motion.div>
+  );
+}
+
+// Audio Player Component
+function AudioPlayer({ audioFile }: { audioFile: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5, duration: 0.6 }}
+      className="w-full bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-neutral-200"
+    >
+      <audio
+        ref={audioRef}
+        src={audioFiles[audioFile] || audioFile}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={handleEnded}
+      />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-center gap-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={togglePlayPause}
+            className="w-16 h-16 flex items-center justify-center bg-black text-white rounded-full hover:bg-neutral-800 transition-colors"
+            aria-label={isPlaying ? "Pause" : "Abspielen"}
+          >
+            {isPlaying ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+          </motion.button>
+        </div>
+
+        <div className="space-y-2">
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSeek}
+            className="w-full h-2 bg-neutral-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black"
+          />
+          <div className="flex justify-between text-xs text-neutral-500">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );
@@ -826,6 +1157,11 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: st
               {card.text}
             </p>
           </motion.div>
+
+          {/* Audio Player wenn vorhanden */}
+          {card.audioFile && (
+            <AudioPlayer audioFile={card.audioFile} />
+          )}
 
           <motion.div 
             initial={{ opacity: 0 }}
@@ -1276,6 +1612,218 @@ function RecoveryDetailScreen({
           </motion.button>
         </div>
       </motion.div>
+    </motion.div>
+  );
+}
+
+function SituationsScreen({
+  onSelectSituation,
+  onBack,
+  onHome
+}: {
+  onSelectSituation: (situationId: string) => void;
+  onBack: () => void;
+  onHome: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className="min-h-screen flex flex-col px-6 py-12 pb-32 relative overflow-hidden"
+    >
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-25"
+        style={{
+          backgroundImage: `url(${backgroundStart})`
+        }}
+      />
+      <div className="max-w-md w-full mx-auto space-y-4 flex-1 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="space-y-3 text-center"
+        >
+          <h1 className="text-2xl" style={{ letterSpacing: '0.02em' }}>Wie fühlst du dich gerade?</h1>
+          <p className="text-sm text-neutral-600" style={{ letterSpacing: '0.01em' }}>
+            Wähle die Situation, die am besten passt
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 gap-3 pt-4">
+          {situations.map((situation, index) => {
+            const Icon = iconMap[situation.icon];
+            return (
+              <motion.button
+                key={situation.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 + index * 0.06, duration: 0.5 }}
+                whileHover={{ scale: 1.03, y: -4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => onSelectSituation(situation.id)}
+                className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm"
+                style={{ backgroundColor: `${situation.color}99` }}
+                aria-label={`${situation.name} auswählen`}
+              >
+                <div className="space-y-2 w-full text-center flex flex-col items-center justify-center">
+                  {Icon && <Icon size={48} className="text-neutral-900" />}
+                  <h3
+                    className="text-lg font-medium text-neutral-900 break-words"
+                    style={{ letterSpacing: '0.01em' }}
+                  >
+                    {situation.name}
+                  </h3>
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onBack}
+          className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center mt-8"
+          aria-label="Zurück"
+        >
+          ← Zurück
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
+
+function SituationResultScreen({
+  situationId,
+  onSelectCard,
+  onBack,
+  onHome
+}: {
+  situationId: string;
+  onSelectCard: (cardId: string) => void;
+  onBack: () => void;
+  onHome: () => void;
+}) {
+  const situation = situations.find(s => s.id === situationId);
+  const relevantCards = situation ? cards.filter(c => situation.relevantCardIds.includes(c.id)) : [];
+
+  if (!situation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-8">
+        <div className="text-center space-y-4">
+          <p className="text-neutral-600">Situation nicht gefunden</p>
+          <button
+            onClick={onBack}
+            className="w-full max-w-xs mx-auto py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center block"
+            aria-label="Zurück"
+          >
+            ← Zurück
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className="min-h-screen relative overflow-hidden"
+    >
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-25"
+        style={{
+          backgroundImage: `url(${backgroundStart})`
+        }}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+        className={`${situation.colorClass} text-white px-6 py-8 relative z-10`}
+      >
+        <div className="max-w-md mx-auto space-y-3">
+          <div className="flex justify-center">
+            {(() => {
+              const Icon = iconMap[situation.icon];
+              return Icon ? <Icon size={64} className="text-black" /> : null;
+            })()}
+          </div>
+          <h2 className="text-3xl text-center text-black" style={{ letterSpacing: '0.02em' }}>{situation.name}</h2>
+          <p className="text-center text-black/80 leading-relaxed" style={{ letterSpacing: '0.01em' }}>
+            {situation.description}
+          </p>
+        </div>
+      </motion.div>
+
+      <div className="max-w-md mx-auto px-6 py-8 pb-32 space-y-4 relative z-10">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-sm text-neutral-600 text-center"
+          style={{ letterSpacing: '0.01em' }}
+        >
+          {relevantCards.length} {relevantCards.length === 1 ? 'Übung' : 'Übungen'} für dich
+        </motion.p>
+
+        {relevantCards.map((card, index) => {
+          const category = categories.find(c => c.id === card.categoryId);
+          return (
+            <motion.button
+              key={card.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + index * 0.06, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onSelectCard(card.id)}
+              className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200"
+              style={{ borderLeftWidth: '4px', borderLeftColor: category?.color || '#000' }}
+              aria-label={`Karte ${card.title} öffnen`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{ backgroundColor: `${category?.color}40`, color: category?.color }}
+                    >
+                      {category?.keyword}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold" style={{ letterSpacing: '0.01em' }}>
+                    {card.title}
+                  </h3>
+                </div>
+              </div>
+            </motion.button>
+          );
+        })}
+
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onBack}
+          className="w-full py-3 px-6 text-neutral-600 hover:text-neutral-800 active:text-neutral-900 transition-colors text-center mt-8"
+          aria-label="Zurück"
+        >
+          ← Zurück
+        </motion.button>
+      </div>
     </motion.div>
   );
 }

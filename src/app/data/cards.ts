@@ -16,6 +16,7 @@ export type Card = {
   title: string;
   text: string;
   hashtags: string[];
+  audioFile?: string;
 };
 
 export type RecoveryType = {
@@ -27,6 +28,16 @@ export type RecoveryType = {
   shortDescription: string;
   signs: string[];
   helps: string[];
+};
+
+export type Situation = {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  colorClass: string;
+  icon: string;
+  relevantCardIds: string[];
 };
 
 export const categories: Category[] = [
@@ -70,7 +81,7 @@ export const categories: Category[] = [
     colorClass: 'bg-[#8FB89C]',
     description: 'Diese Karten helfen dir, wieder im Körper anzukommen.',
     label: 'Grün – Körper & Erdung',
-    keyword: 'Erdung',
+    keyword: 'Zurückkommen',
     shortDescription: 'wenn du zurückkommen möchtest',
     badgeLabels: ['Körper', 'Präsenz', 'Erdung']
   },
@@ -92,7 +103,7 @@ export const categories: Category[] = [
     colorClass: 'bg-[#C9B5A8]',
     description: 'Diese Karten sind da, um dich zu halten.',
     label: 'Beige – Zweifel & Erschöpfung',
-    keyword: 'Halten',
+    keyword: 'Trösten',
     shortDescription: 'wenn du nicht mehr kannst',
     badgeLabels: ['Mitgefühl', 'Halt', 'Selbstmitgefühl']
   }
@@ -480,6 +491,130 @@ Nicht, weil du kämpfst,
 sondern weil nichts bleibt,
 wie es ist.`,
     hashtags: ['zweifel', 'hoffnung', 'es_verändert_sich']
+  },
+  // Innerer sicherer Ort - für alle 3 Kategorien
+  {
+    id: 'blau-innerer-ort',
+    categoryId: 'blau',
+    title: 'Innerer sicherer Ort',
+    text: `1. Ankommen
+Setz dich bequem hin. Spür den Kontakt zum Stuhl und den Boden unter deinen Füßen.
+Atme ruhig ein und aus. Komm mit jedem Atemzug ein bisschen mehr zur Ruhe.
+
+2. Atem & Gedanken
+Nimm deinen Atem wahr, ohne ihn zu verändern.
+Wenn Gedanken kommen: Lass sie einfach da sein und wieder weiterziehen.
+
+3. Reise zu deinem Wohlfühlort
+Stell dir einen Ort vor, an dem du dich sicher, geborgen und wohl fühlst.
+Er kann real sein oder aus deiner Fantasie.
+
+4. Schutz & Grenze
+Gib dem Ort eine klare Begrenzung (z.B. Tür, Tor, Zaun oder eine unsichtbare Grenze).
+Du entscheidest, wer oder was dort sein darf (am besten keine Menschen – vielleicht Tiere).
+
+5. Sinne aktivieren (und anpassen)
+Schau dich um: Was siehst du? Mach es so schön, wie du es brauchst.
+Hör hin: Welche Geräusche sind da? Stell Lautstärke und Art so ein, dass es angenehm ist.
+Riech: Gibt es einen Duft? Wenn nicht, erschaffe einen.
+Schmeck: Gibt es etwas zu trinken oder zu essen?
+Spür: Wie fühlt sich die Luft an? Temperatur? Kleidung? Untergrund? Alles darf bequem sein.
+
+6. Genießen
+Bleib einen Moment dort. Atme ruhig. Nimm das Gefühl von Sicherheit und Ruhe in dir wahr.
+
+7. Anker setzen (optional)
+Gib dem Ort einen Namen oder ein Symbol.
+Oder verbinde ihn mit einer kleinen Geste (z.B. Hand aufs Herz), damit du ihn schnell wieder findest.
+
+8. Zurückkommen
+Verabschiede dich langsam von deinem Ort.
+Spür wieder deinen Atem, dann den Stuhl, den Boden, die Umgebung.
+Nimm Geräusche im Raum wahr.
+Beweg dich sanft, streck dich, öffne die Augen in deinem Tempo.`,
+    hashtags: ['panik', 'nicht_einschlafen_können', 'beruhigung', 'sicherheit']
+  },
+  {
+    id: 'rosa-innerer-ort',
+    categoryId: 'rosa',
+    title: 'Innerer sicherer Ort',
+    text: `1. Ankommen
+Setz dich bequem hin. Spür den Kontakt zum Stuhl und den Boden unter deinen Füßen.
+Atme ruhig ein und aus. Komm mit jedem Atemzug ein bisschen mehr zur Ruhe.
+
+2. Atem & Gedanken
+Nimm deinen Atem wahr, ohne ihn zu verändern.
+Wenn Gedanken kommen: Lass sie einfach da sein und wieder weiterziehen.
+
+3. Reise zu deinem Wohlfühlort
+Stell dir einen Ort vor, an dem du dich sicher, geborgen und wohl fühlst.
+Er kann real sein oder aus deiner Fantasie.
+
+4. Schutz & Grenze
+Gib dem Ort eine klare Begrenzung (z.B. Tür, Tor, Zaun oder eine unsichtbare Grenze).
+Du entscheidest, wer oder was dort sein darf (am besten keine Menschen – vielleicht Tiere).
+
+5. Sinne aktivieren (und anpassen)
+Schau dich um: Was siehst du? Mach es so schön, wie du es brauchst.
+Hör hin: Welche Geräusche sind da? Stell Lautstärke und Art so ein, dass es angenehm ist.
+Riech: Gibt es einen Duft? Wenn nicht, erschaffe einen.
+Schmeck: Gibt es etwas zu trinken oder zu essen?
+Spür: Wie fühlt sich die Luft an? Temperatur? Kleidung? Untergrund? Alles darf bequem sein.
+
+6. Genießen
+Bleib einen Moment dort. Atme ruhig. Nimm das Gefühl von Sicherheit und Ruhe in dir wahr.
+
+7. Anker setzen (optional)
+Gib dem Ort einen Namen oder ein Symbol.
+Oder verbinde ihn mit einer kleinen Geste (z.B. Hand aufs Herz), damit du ihn schnell wieder findest.
+
+8. Zurückkommen
+Verabschiede dich langsam von deinem Ort.
+Spür wieder deinen Atem, dann den Stuhl, den Boden, die Umgebung.
+Nimm Geräusche im Raum wahr.
+Beweg dich sanft, streck dich, öffne die Augen in deinem Tempo.`,
+    hashtags: ['panik', 'nicht_einschlafen_können', 'schutz', 'geborgenheit']
+  },
+  {
+    id: 'beige-innerer-ort',
+    categoryId: 'beige',
+    title: 'Innerer sicherer Ort',
+    text: `1. Ankommen
+Setz dich bequem hin. Spür den Kontakt zum Stuhl und den Boden unter deinen Füßen.
+Atme ruhig ein und aus. Komm mit jedem Atemzug ein bisschen mehr zur Ruhe.
+
+2. Atem & Gedanken
+Nimm deinen Atem wahr, ohne ihn zu verändern.
+Wenn Gedanken kommen: Lass sie einfach da sein und wieder weiterziehen.
+
+3. Reise zu deinem Wohlfühlort
+Stell dir einen Ort vor, an dem du dich sicher, geborgen und wohl fühlst.
+Er kann real sein oder aus deiner Fantasie.
+
+4. Schutz & Grenze
+Gib dem Ort eine klare Begrenzung (z.B. Tür, Tor, Zaun oder eine unsichtbare Grenze).
+Du entscheidest, wer oder was dort sein darf (am besten keine Menschen – vielleicht Tiere).
+
+5. Sinne aktivieren (und anpassen)
+Schau dich um: Was siehst du? Mach es so schön, wie du es brauchst.
+Hör hin: Welche Geräusche sind da? Stell Lautstärke und Art so ein, dass es angenehm ist.
+Riech: Gibt es einen Duft? Wenn nicht, erschaffe einen.
+Schmeck: Gibt es etwas zu trinken oder zu essen?
+Spür: Wie fühlt sich die Luft an? Temperatur? Kleidung? Untergrund? Alles darf bequem sein.
+
+6. Genießen
+Bleib einen Moment dort. Atme ruhig. Nimm das Gefühl von Sicherheit und Ruhe in dir wahr.
+
+7. Anker setzen (optional)
+Gib dem Ort einen Namen oder ein Symbol.
+Oder verbinde ihn mit einer kleinen Geste (z.B. Hand aufs Herz), damit du ihn schnell wieder findest.
+
+8. Zurückkommen
+Verabschiede dich langsam von deinem Ort.
+Spür wieder deinen Atem, dann den Stuhl, den Boden, die Umgebung.
+Nimm Geräusche im Raum wahr.
+Beweg dich sanft, streck dich, öffne die Augen in deinem Tempo.`,
+    hashtags: ['nicht_einschlafen_können', 'erschöpfung', 'halt', 'selbstmitgefühl']
   }
 ];
 
@@ -546,5 +681,62 @@ export const recoveryTypes: RecoveryType[] = [
       'Selfcare & Journaling',
       'dich fragen: "Was brauche ich?"'
     ]
+  }
+];
+
+export const situations: Situation[] = [
+  {
+    id: 'panik',
+    name: 'Panikattacke',
+    description: 'Dein Herz rast, du fühlst Alarm im Körper',
+    color: '#E85D75',
+    colorClass: 'bg-[#E85D75]',
+    icon: 'AlertCircle',
+    relevantCardIds: ['blau-1', 'blau-innerer-ort', 'rosa-innerer-ort']
+  },
+  {
+    id: 'schlaf',
+    name: 'Kann nicht einschlafen',
+    description: 'Die Gedanken kreisen, du findest keine Ruhe',
+    color: '#7B68A6',
+    colorClass: 'bg-[#7B68A6]',
+    icon: 'Moon',
+    relevantCardIds: ['blau-innerer-ort', 'rosa-innerer-ort', 'beige-innerer-ort', 'blau-4']
+  },
+  {
+    id: 'ueberwaeltigt',
+    name: 'Überwältigt',
+    description: 'Alles ist zu viel, du fühlst dich überfordert',
+    color: '#E8A87C',
+    colorClass: 'bg-[#E8A87C]',
+    icon: 'CloudRain',
+    relevantCardIds: ['blau-2', 'blau-3', 'orange-1', 'gruen-2', 'rosa-1']
+  },
+  {
+    id: 'unruhig',
+    name: 'Unruhig & rastlos',
+    description: 'Du kannst nicht stillsitzen, fühlst dich getrieben',
+    color: '#F4A261',
+    colorClass: 'bg-[#F4A261]',
+    icon: 'Wind',
+    relevantCardIds: ['orange-1', 'orange-4', 'koralle-1', 'koralle-2']
+  },
+  {
+    id: 'dissoziation',
+    name: 'Neben mir stehen',
+    description: 'Du fühlst dich nicht ganz da, benommen oder abwesend',
+    color: '#84B59F',
+    colorClass: 'bg-[#84B59F]',
+    icon: 'Cloud',
+    relevantCardIds: ['gruen-1', 'gruen-2', 'gruen-4', 'gruen-5']
+  },
+  {
+    id: 'verspannt',
+    name: 'Angespannt',
+    description: 'Dein Körper ist verspannt, du fühlst Druck',
+    color: '#C9B5A8',
+    colorClass: 'bg-[#C9B5A8]',
+    icon: 'Zap',
+    relevantCardIds: ['blau-4', 'orange-2', 'orange-5', 'koralle-2', 'koralle-6', 'gruen-6']
   }
 ];
