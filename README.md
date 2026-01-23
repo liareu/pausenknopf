@@ -10,8 +10,11 @@ Eine Progressive Web App (PWA), die in herausfordernden Momenten Unterstützung 
 
 ## 📱 Features
 
-- **🎯 Kategoriebasierte Navigation**: Sechs verschiedene Kategorien für unterschiedliche emotionale Zustände
+- **🔍 Suchfunktion**: Finde Übungen durch Live-Suche über alle Titel, Texte und Hashtags
+- **🎯 Situations-Navigation**: 6 häufige Situationen (Panik, Schlaf, Überwältigt, etc.) führen direkt zu passenden Übungen
+- **🎨 Kategoriebasierte Navigation**: Sechs verschiedene Kategorien für unterschiedliche emotionale Zustände
 - **🎲 Zufallsfunktion**: Lasse dir eine zufällige Karte zeigen
+- **⭐ Favoriten**: Speichere deine Lieblingsübungen für schnellen Zugriff
 - **💪 Offline-Funktionalität**: Funktioniert vollständig offline als PWA
 - **📱 Installierbar**: Kann als App auf dem Smartphone installiert werden
 - **♿ Barrierefrei**: WCAG-konforme Farbkontraste, ARIA-Labels, Keyboard-Navigation
@@ -23,9 +26,20 @@ Eine Progressive Web App (PWA), die in herausfordernden Momenten Unterstützung 
 1. **Runterfahren** (Blau) - Wenn das Herz rast
 2. **Regulieren** (Orange) - Wenn du sehr unruhig bist
 3. **Aktivieren** (Koralle) - Wenn du Bewegung brauchst
-4. **Erdung** (Grün) - Wenn du dich nicht ganz da fühlst
+4. **Zurückkommen** (Grün) - Wenn du dich nicht ganz da fühlst
 5. **Sicherheit** (Rosa) - Wenn du Ruhe brauchst
-6. **Halten** (Beige) - Wenn du zweifelst oder erschöpft bist
+6. **Trösten** (Beige) - Wenn du zweifelst oder erschöpft bist
+
+## 🎯 Situationen
+
+Die App bietet auch direkten Zugriff auf passende Übungen basierend auf häufigen Situationen:
+
+- **Panikattacke** - Wenn dein Herz rast und du Alarm im Körper fühlst
+- **Kann nicht einschlafen** - Wenn die Gedanken kreisen und du keine Ruhe findest
+- **Überwältigt** - Wenn alles zu viel ist und du dich überfordert fühlst
+- **Unruhig & rastlos** - Wenn du nicht stillsitzen kannst und dich getrieben fühlst
+- **Neben mir stehen** - Wenn du dich nicht ganz da, benommen oder abwesend fühlst
+- **Angespannt** - Wenn dein Körper verspannt ist und du Druck fühlst
 
 ## 🚀 Installation & Entwicklung
 
