@@ -1,10 +1,9 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark';
 
 type ThemeContextType = {
   theme: Theme;
-  actualTheme: 'light' | 'dark'; // The actual resolved theme (system → light/dark)
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 };
@@ -12,53 +11,17 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Initialize from localStorage or default to 'system'
+  // Initialize from localStorage or default to 'light'
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem('pausenknopf-theme');
-    return (stored as Theme) || 'system';
+    return (stored as Theme) || 'light';
   });
 
-  // Get actual theme based on system preference
-  const getSystemTheme = (): 'light' | 'dark' => {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  };
-
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() => {
-    if (theme === 'system') {
-      return getSystemTheme();
-    }
-    return theme;
-  });
-
-  // Update actual theme when theme or system preference changes
+  // Update theme class on document root
   useEffect(() => {
-    const updateActualTheme = () => {
-      const newActualTheme = theme === 'system' ? getSystemTheme() : theme;
-      setActualTheme(newActualTheme);
-
-      // Apply to document root
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(newActualTheme);
-    };
-
-    updateActualTheme();
-
-    // Listen for system theme changes
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => updateActualTheme();
-
-      // Modern browsers
-      if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        // Fallback for older browsers
-        mediaQuery.addListener(handleChange);
-        return () => mediaQuery.removeListener(handleChange);
-      }
-    }
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
@@ -67,17 +30,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
-    } else {
-      setTheme('light');
-    }
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, actualTheme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

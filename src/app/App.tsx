@@ -22,11 +22,11 @@ function getDailyAffirmation(): Affirmation {
 
 // Background Image Component
 function BackgroundImage({ opacity = 'opacity-25' }: { opacity?: string }) {
-  const { actualTheme } = useTheme();
-  const bgImage = actualTheme === 'dark' ? backgroundDark : backgroundStart;
+  const { theme } = useTheme();
+  const bgImage = theme === 'dark' ? backgroundDark : backgroundStart;
 
   // Im Dark Mode volle Opacity, im Light Mode die übergebene Opacity
-  const finalOpacity = actualTheme === 'dark' ? 'opacity-100' : opacity;
+  const finalOpacity = theme === 'dark' ? 'opacity-100' : opacity;
 
   return (
     <div
@@ -92,69 +92,56 @@ function BottomNav({
   onHome: () => void;
   onFavorites: () => void;
 }) {
-  const { theme, actualTheme, toggleTheme } = useTheme();
-
-  const getThemeIcon = () => {
-    if (theme === 'system') {
-      return actualTheme === 'dark' ? <Moon size={18} /> : <Sun size={18} />;
-    }
-    return theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />;
-  };
-
-  const getThemeLabel = () => {
-    if (theme === 'system') return 'Auto';
-    return theme === 'dark' ? 'Dark' : 'Light';
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-50 px-6 flex justify-center">
-      <div className="bg-black dark:bg-white/10 dark:backdrop-blur-xl rounded-full shadow-2xl px-6 py-3 flex items-center gap-4 transition-colors">
+    <div className="fixed bottom-6 left-0 right-0 z-50 px-4 sm:px-6 flex justify-center">
+      <div className="bg-black dark:bg-white/10 dark:backdrop-blur-xl rounded-full shadow-2xl px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 transition-colors">
         <button
           onClick={onHome}
-          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'none' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
+          className={`transition-colors text-sm px-2 sm:px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'none' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Zur Startseite"
         >
           <House size={18} />
-          <span>Start</span>
+          <span className="hidden sm:inline">Start</span>
         </button>
 
         <button
           onClick={() => onTabChange('exercises')}
-          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'exercises' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
+          className={`transition-colors text-sm px-2 sm:px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'exercises' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Was hilft jetzt?"
         >
           <Compass size={18} />
-          <span>Übungen</span>
+          <span className="hidden sm:inline">Übungen</span>
         </button>
 
         <button
           onClick={() => onTabChange('recovery')}
-          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'recovery' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
+          className={`transition-colors text-sm px-2 sm:px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'recovery' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Was fehlt mir?"
         >
           <Wind size={18} />
-          <span>Erholung</span>
+          <span className="hidden sm:inline">Erholung</span>
         </button>
 
         <button
           onClick={onFavorites}
-          className={`transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'favorites' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
+          className={`transition-colors text-sm px-2 sm:px-3 py-2 rounded-full flex items-center gap-2 ${currentTab === 'favorites' ? 'text-white dark:text-white bg-white/10' : 'text-neutral-400 dark:text-neutral-300 hover:text-white'}`}
           aria-label="Meine Favoriten"
         >
           <Heart size={18} />
-          <span>Favoriten</span>
+          <span className="hidden sm:inline">Favoriten</span>
         </button>
 
-        <div className="w-px h-6 bg-neutral-700 dark:bg-neutral-500" />
+        <div className="w-px h-6 bg-neutral-700 dark:bg-neutral-500 hidden sm:block" />
 
         <button
           onClick={toggleTheme}
-          className="transition-colors text-sm px-3 py-2 rounded-full flex items-center gap-2 text-neutral-400 dark:text-neutral-300 hover:text-white"
-          aria-label={`Theme wechseln (aktuell: ${getThemeLabel()})`}
-          title={`Theme: ${getThemeLabel()}`}
+          className="transition-colors text-sm px-2 sm:px-3 py-2 rounded-full flex items-center gap-2 text-neutral-400 dark:text-neutral-300 hover:text-white"
+          aria-label={theme === 'light' ? 'Dark Mode aktivieren' : 'Light Mode aktivieren'}
+          title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
         >
-          {getThemeIcon()}
-          <span className="text-xs">{getThemeLabel()}</span>
+          {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
         </button>
       </div>
     </div>
@@ -417,7 +404,7 @@ function StartScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center px-6 pb-12 relative overflow-hidden"
       role="main"
     >
       <BackgroundImage opacity="opacity-30" />
@@ -448,23 +435,23 @@ function StartScreen({
       ))}
 
       {/* Content */}
-      <div className="max-w-md w-full text-center space-y-4 relative z-10 pb-40">
-        {/* Logo */}
+      <div className="max-w-md w-full relative z-10 pb-40 pt-6 px-6">
+        {/* Logo - ganz oben */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.6 }}
-          className="flex justify-center mb-0"
+          className="flex justify-center"
         >
-          <img src={logoSvg} alt="Pausenknopf Logo" className="w-44 h-44 dark:invert transition-all duration-300" />
+          <img src={logoSvg} alt="Pausenknopf Logo" className="w-28 h-28 dark:invert transition-all duration-300" />
         </motion.div>
 
-        {/* Tagline */}
+        {/* Tagline - nah am Logo */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-black dark:text-white text-lg leading-relaxed px-4 mb-12 -mt-6"
+          className="text-black dark:text-white text-base font-light leading-relaxed text-center mb-8"
           style={{ letterSpacing: '0.01em' }}
         >
           Für Momente, die gerade viel sind
@@ -475,12 +462,12 @@ function StartScreen({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.6 }}
-          className="px-8 text-center mb-12"
+          className="text-center mb-10"
         >
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2 uppercase tracking-wider" style={{ letterSpacing: '0.1em' }}>
             Deine Affirmation heute
           </p>
-          <p className="text-base text-black dark:text-white leading-relaxed" style={{ letterSpacing: '0.01em' }}>
+          <p className="text-sm text-black dark:text-white leading-relaxed max-w-sm mx-auto" style={{ letterSpacing: '0.01em' }}>
             {getDailyAffirmation().text}
           </p>
         </motion.div>
@@ -501,13 +488,13 @@ function StartScreen({
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={onExercises}
-              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
+              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-3xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
               style={{ borderLeftColor: '#6B9BD1' }}
-              aria-label="Was hilft jetzt?"
+              aria-label="Übungen für jetzt"
             >
               <div className="space-y-1 text-left">
-                <p className="text-base text-black dark:text-white" style={{ letterSpacing: '0.01em' }}>Was hilft jetzt?</p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-light" style={{ letterSpacing: '0.01em' }}>Übungen für den Moment</p>
+                <p className="text-base text-black dark:text-white" style={{ letterSpacing: '0.01em' }}>Übungen für jetzt</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-light" style={{ letterSpacing: '0.01em' }}>Was dir jetzt helfen kann</p>
               </div>
             </motion.button>
 
@@ -517,8 +504,25 @@ function StartScreen({
               transition={{ delay: 0.45, duration: 0.5 }}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
+              onClick={onSOS}
+              className="py-5 px-4 bg-[#D97850] dark:bg-[#E08860] text-white rounded-3xl shadow-sm hover:shadow-md transition-all border-l-4"
+              style={{ borderLeftColor: '#c76942' }}
+              aria-label="Panik Button - Schnelle Atemübung"
+            >
+              <div className="space-y-1 text-left">
+                <p className="text-base text-white" style={{ letterSpacing: '0.01em' }}>Panik-Button</p>
+                <p className="text-xs text-white/90 font-light" style={{ letterSpacing: '0.01em' }}>Schnelle Atemübung</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onRecovery}
-              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
+              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-3xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
               style={{ borderLeftColor: '#E5C5B5' }}
               aria-label="Was fehlt mir?"
             >
@@ -531,34 +535,17 @@ function StartScreen({
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
+              transition={{ delay: 0.55, duration: 0.5 }}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={onSituations}
-              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
+              className="py-5 px-4 bg-white/80 dark:bg-white/8 dark:backdrop-blur-sm rounded-3xl shadow-sm hover:shadow-md transition-all border-l-4 border-t border-r border-b border-neutral-200 dark:border-neutral-700"
               style={{ borderLeftColor: '#F4A261' }}
               aria-label="Wie fühlst du dich?"
             >
               <div className="space-y-1 text-left">
                 <p className="text-base text-black dark:text-white" style={{ letterSpacing: '0.01em' }}>Wie fühlst du dich?</p>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 font-light" style={{ letterSpacing: '0.01em' }}>Finde Übungen nach Situation</p>
-              </div>
-            </motion.button>
-
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onSOS}
-              className="py-5 px-4 bg-[#D97850] dark:bg-[#E08860] text-white rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4"
-              style={{ borderLeftColor: '#c76942' }}
-              aria-label="Panik Button - Schnelle Atemübung"
-            >
-              <div className="space-y-1 text-left">
-                <p className="text-base text-white" style={{ letterSpacing: '0.01em' }}>Panik-Button</p>
-                <p className="text-xs text-white/90 font-light" style={{ letterSpacing: '0.01em' }}>Schnelle Atemübung</p>
               </div>
             </motion.button>
           </div>
@@ -649,7 +636,7 @@ function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Übungen durchsuchen..."
-        className="w-full py-4 pl-12 pr-12 bg-white/60 backdrop-blur-sm rounded-2xl shadow-sm border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-neutral-400 transition-all"
+        className="w-full py-4 pl-12 pr-12 bg-white/60 backdrop-blur-sm rounded-3xl shadow-sm border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-neutral-400 transition-all"
         aria-label="Übungen durchsuchen"
       />
       {value && (
@@ -719,7 +706,7 @@ function SearchResults({
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelectCard(card.id)}
-            className="w-full p-6 bg-white/75 dark:bg-white/10 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200 dark:border-white/20"
+            className="w-full p-6 bg-white/75 dark:bg-white/10 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-3xl text-left border border-neutral-200 dark:border-white/20"
             style={{ borderLeftWidth: '4px', borderLeftColor: borderColor }}
             aria-label={`Karte ${card.title} öffnen`}
           >
@@ -746,7 +733,7 @@ function SearchResults({
 }
 
 function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onSituations }: { onSelectCategory: (categoryId: string) => void; onSelectCard: (cardId: string) => void; onHome: () => void; onSituations: () => void }) {
-  const { actualTheme } = useTheme();
+  const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -799,7 +786,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onSituation
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={getRandomCard}
-            className="py-5 px-4 bg-black/85 dark:bg-white/20 text-white dark:text-white rounded-2xl hover:bg-black/90 dark:hover:bg-white/30 active:bg-black/80 dark:active:bg-white/25 transition-all font-medium shadow-sm backdrop-blur-sm dark:border dark:border-white/30"
+            className="py-5 px-4 bg-black/85 dark:bg-white/20 text-white dark:text-white rounded-3xl hover:bg-black/90 dark:hover:bg-white/30 active:bg-black/80 dark:active:bg-white/25 transition-all font-medium shadow-sm backdrop-blur-sm dark:border dark:border-white/30"
             style={{ letterSpacing: '0.01em' }}
             aria-label="Zufällige Karte auswählen"
           >
@@ -816,7 +803,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onSituation
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onSituations}
-            className="py-5 px-4 bg-black/85 dark:bg-white/20 text-white dark:text-white rounded-2xl hover:bg-black/90 dark:hover:bg-white/30 active:bg-black/80 dark:active:bg-white/25 transition-all shadow-sm backdrop-blur-sm dark:border dark:border-white/30"
+            className="py-5 px-4 bg-black/85 dark:bg-white/20 text-white dark:text-white rounded-3xl hover:bg-black/90 dark:hover:bg-white/30 active:bg-black/80 dark:active:bg-white/25 transition-all shadow-sm backdrop-blur-sm dark:border dark:border-white/30"
             aria-label="Übungen nach Situation finden"
           >
             <div className="flex flex-col items-center gap-2">
@@ -834,12 +821,12 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onSituation
             results={searchResults}
             onSelectCard={onSelectCard}
             searchQuery={debouncedQuery}
-            isDarkMode={actualTheme === 'dark'}
+            isDarkMode={theme === 'dark'}
           />
         ) : (
           <div className="grid grid-cols-2 gap-3 pt-4">
             {categories.map((category, index) => {
-              const themeColor = getCategoryColor(category.id, actualTheme === 'dark');
+              const themeColor = getCategoryColor(category.id, theme === 'dark');
               return (
                 <motion.button
                   key={category.id}
@@ -849,7 +836,7 @@ function OrientationScreen({ onSelectCategory, onSelectCard, onHome, onSituation
                   whileHover={{ scale: 1.03, y: -4 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => onSelectCategory(category.id)}
-                  className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm dark:border dark:border-white/20"
+                  className="rounded-3xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-6 text-center backdrop-blur-sm dark:border dark:border-white/20"
                   style={{ backgroundColor: `${themeColor}99` }}
                   aria-label={`Kategorie ${category.name} auswählen`}
                 >
@@ -896,7 +883,7 @@ function CategoryScreen({
   onBack: () => void;
   onHome: () => void;
 }) {
-  const { actualTheme } = useTheme();
+  const { theme } = useTheme();
   const category = categories.find(c => c.id === categoryId);
   const categoryCards = cards.filter(c => c.categoryId === categoryId);
 
@@ -931,7 +918,7 @@ function CategoryScreen({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
         className="text-white px-6 py-8 relative z-10"
-        style={{ backgroundColor: getCategoryColor(category.id, actualTheme === 'dark') }}
+        style={{ backgroundColor: getCategoryColor(category.id, theme === 'dark') }}
       >
         <div className="max-w-md mx-auto space-y-3">
           <p className="text-[10px] opacity-90 block px-4 py-1.5 bg-white/20 rounded-full backdrop-blur-sm w-fit">{category.label.split(' – ')[1] || category.label}</p>
@@ -950,7 +937,7 @@ function CategoryScreen({
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelectCard(card.id)}
-            className="w-full py-6 px-6 bg-white/75 dark:bg-white/10 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-center border border-neutral-200 dark:border-white/20"
+            className="w-full py-6 px-6 bg-white/75 dark:bg-white/10 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-3xl text-center border border-neutral-200 dark:border-white/20"
             aria-label={`Karte ${card.title} öffnen`}
           >
             <h3 className="text-base dark:text-white" style={{ letterSpacing: '0.01em' }}>{card.title}</h3>
@@ -1028,7 +1015,7 @@ function AudioPlayer({ audioFile }: { audioFile: string }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.6 }}
-      className="w-full bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-neutral-200"
+      className="w-full bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-sm border border-neutral-200"
     >
       <audio
         ref={audioRef}
@@ -1147,7 +1134,7 @@ function BreathingCircle() {
 }
 
 function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: string; onBack: () => void; onRandomCard: () => void; onHome: () => void }) {
-  const { actualTheme } = useTheme();
+  const { theme } = useTheme();
   const card = cards.find(c => c.id === cardId);
   const category = card ? categories.find(c => c.id === card.categoryId) : null;
   const { isFavorite, toggleFavorite } = useFavoritesContext();
@@ -1186,7 +1173,7 @@ function CardDetailScreen({ cardId, onBack, onRandomCard, onHome }: { cardId: st
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
         className="px-6 py-6 relative z-10"
-        style={{ backgroundColor: getCategoryColor(category.id, actualTheme === 'dark') }}
+        style={{ backgroundColor: getCategoryColor(category.id, theme === 'dark') }}
       >
         <div className="max-w-md mx-auto space-y-2">
           <p className="text-white text-[10px] opacity-90">{category.label.split(' – ')[1] || category.label}</p>
@@ -1519,7 +1506,7 @@ function RecoveryTypesScreen({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onStartQuestionnaire}
-          className="w-full py-4 px-6 bg-black/85 text-white hover:bg-black/90 active:bg-black/80 transition-all rounded-lg backdrop-blur-sm"
+          className="w-full py-4 px-6 bg-black/85 text-white hover:bg-black/90 active:bg-black/80 transition-all rounded-3xl backdrop-blur-sm"
           aria-label="Fragebogen starten"
         >
           Fragebogen starten
@@ -1535,7 +1522,7 @@ function RecoveryTypesScreen({
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectRecovery(recovery.id)}
-              className="w-full rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm p-6 backdrop-blur-sm"
+              className="w-full rounded-3xl hover:shadow-md active:shadow-sm transition-all shadow-sm p-6 backdrop-blur-sm"
               style={{ backgroundColor: `${recovery.color}99` }}
               aria-label={`${recovery.name} auswählen`}
             >
@@ -1652,7 +1639,7 @@ function RecoveryDetailScreen({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onStartQuestionnaire}
-            className="w-full py-4 px-6 bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 transition-colors rounded-lg font-medium"
+            className="w-full py-4 px-6 bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 transition-colors rounded-3xl font-medium"
             aria-label="Fragebogen starten"
           >
             Unsicher? Mach den Fragebogen
@@ -1714,7 +1701,7 @@ function SituationsScreen({
                 whileHover={{ scale: 1.03, y: -4 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => onSelectSituation(situation.id)}
-                className="rounded-2xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-5 text-center backdrop-blur-sm"
+                className="rounded-3xl hover:shadow-md active:shadow-sm transition-all shadow-sm aspect-square flex flex-col justify-center items-center p-5 text-center backdrop-blur-sm"
                 style={{ backgroundColor: `${situation.color}99` }}
                 aria-label={`${situation.name} auswählen`}
               >
@@ -1824,7 +1811,7 @@ function SituationResultScreen({
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectCard(card.id)}
-              className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200"
+              className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-3xl text-left border border-neutral-200"
               style={{ borderLeftWidth: '4px', borderLeftColor: category?.color || '#000' }}
               aria-label={`Karte ${card.title} öffnen`}
             >
@@ -1932,7 +1919,7 @@ function QuestionnaireScreen({
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => toggleSign(item.sign)}
-                className={`w-full py-4 px-6 rounded-lg text-left transition-all ${
+                className={`w-full py-4 px-6 rounded-3xl text-left transition-all ${
                   isSelected
                     ? 'bg-black text-white'
                     : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800'
@@ -1961,7 +1948,7 @@ function QuestionnaireScreen({
             whileTap={selectedSigns.length > 0 ? { scale: 0.98 } : {}}
             onClick={handleSubmit}
             disabled={selectedSigns.length === 0}
-            className={`w-full py-4 px-6 rounded-lg transition-colors ${
+            className={`w-full py-4 px-6 rounded-3xl transition-colors ${
               selectedSigns.length > 0
                 ? 'bg-black text-white hover:bg-neutral-800'
                 : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'
@@ -2032,7 +2019,7 @@ function QuestionnaireResultScreen({
             transition={{ delay: 0.2, duration: 0.5 }}
             className="space-y-6"
           >
-            <div className={`${bestMatch.recovery.colorClass} rounded-2xl p-6 space-y-3`}>
+            <div className={`${bestMatch.recovery.colorClass} rounded-3xl p-6 space-y-3`}>
               <h2 className="text-lg font-serif text-neutral-900" style={{ fontFamily: 'Rufina, serif', letterSpacing: '0.02em' }}>
                 {bestMatch.recovery.name}
               </h2>
@@ -2043,7 +2030,7 @@ function QuestionnaireResultScreen({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onViewDetail(bestMatch.recovery.id)}
-                className="w-full py-3 px-6 bg-black text-white hover:bg-neutral-800 transition-colors rounded-lg"
+                className="w-full py-3 px-6 bg-black text-white hover:bg-neutral-800 transition-colors rounded-3xl"
                 aria-label="Details ansehen"
               >
                 Was dir helfen könnte
@@ -2051,7 +2038,7 @@ function QuestionnaireResultScreen({
             </div>
 
             {sortedScores.filter(s => s.matchCount > 0 && s.recovery.id !== bestMatch.recovery.id).map((score) => (
-              <div key={score.recovery.id} className={`${score.recovery.colorClass} rounded-2xl p-5 space-y-2 opacity-80`}>
+              <div key={score.recovery.id} className={`${score.recovery.colorClass} rounded-3xl p-5 space-y-2 opacity-80`}>
                 <h3 className="text-base" style={{ letterSpacing: '0.01em' }}>{score.recovery.name}</h3>
                 <p className="text-xs text-neutral-800" style={{ letterSpacing: '0.01em' }}>
                   {score.matchCount} von {score.recovery.signs.length} Anzeichen
@@ -2088,7 +2075,7 @@ function QuestionnaireResultScreen({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onRetry}
-            className="w-full py-3 px-6 bg-white border-2 border-black text-black hover:bg-neutral-50 transition-colors rounded-lg"
+            className="w-full py-3 px-6 bg-white border-2 border-black text-black hover:bg-neutral-50 transition-colors rounded-3xl"
             aria-label="Fragebogen nochmal machen"
           >
             Nochmal versuchen
@@ -2200,7 +2187,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
             transition={{ delay: 0.2, duration: 0.6 }}
             className="space-y-6"
           >
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-3xl p-5 space-y-3">
               <div className="space-y-2">
                 <p className="text-xl text-[#8FB89C]">5</p>
                 <p className="text-neutral-800 text-sm">Nenne 5 Dinge, die du sehen kannst</p>
@@ -2208,7 +2195,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-3xl p-5 space-y-3">
               <div className="space-y-2">
                 <p className="text-xl text-[#8FB89C]">4</p>
                 <p className="text-neutral-800 text-sm">Nenne 4 Dinge, die du berühren kannst</p>
@@ -2216,7 +2203,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-3xl p-5 space-y-3">
               <div className="space-y-2">
                 <p className="text-xl text-[#8FB89C]">3</p>
                 <p className="text-neutral-800 text-sm">Nenne 3 Dinge, die du hören kannst</p>
@@ -2224,7 +2211,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-3xl p-5 space-y-3">
               <div className="space-y-2">
                 <p className="text-xl text-[#8FB89C]">2</p>
                 <p className="text-neutral-800 text-sm">Nenne 2 Dinge, die du riechen kannst</p>
@@ -2232,7 +2219,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
               </div>
             </div>
 
-            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-2xl p-5 space-y-3">
+            <div className="bg-[#8FB89C]/20 backdrop-blur-sm rounded-3xl p-5 space-y-3">
               <div className="space-y-2">
                 <p className="text-xl text-[#8FB89C]">1</p>
                 <p className="text-neutral-800 text-sm">Nenne 1 Ding, das du schmecken kannst</p>
@@ -2249,7 +2236,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
           >
             <button
               onClick={() => setMode('breathing')}
-              className="w-full py-4 px-6 bg-[#6B9BD1] text-white hover:bg-[#5a8bc0] transition-colors rounded-lg font-medium"
+              className="w-full py-4 px-6 bg-[#6B9BD1] text-white hover:bg-[#5a8bc0] transition-colors rounded-3xl font-medium"
             >
               Zur Atemübung wechseln
             </button>
@@ -2342,7 +2329,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
           transition={{ delay: 0.7, duration: 0.6 }}
           className="space-y-3"
         >
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl overflow-hidden">
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl overflow-hidden">
             <button
               onClick={() => setContactsOpen(!contactsOpen)}
               className="w-full py-3 px-6 cursor-pointer text-center text-sm font-semibold text-neutral-700 hover:bg-white/40 transition-colors flex items-center justify-center gap-2"
@@ -2361,21 +2348,21 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
               >
                 <a
                   href="tel:08001110111"
-                  className="flex items-center justify-between w-full py-3 px-4 bg-[#E63946]/90 hover:bg-[#E63946] text-white rounded-xl transition-colors text-sm font-semibold"
+                  className="flex items-center justify-between w-full py-3 px-4 bg-[#E63946]/90 hover:bg-[#E63946] text-white rounded-2xl transition-colors text-sm font-semibold"
                 >
                   <span>Telefonseelsorge</span>
                   <span className="text-xs">0800 111 0 111</span>
                 </a>
                 <a
                   href="tel:08001110222"
-                  className="flex items-center justify-between w-full py-3 px-4 bg-[#E63946]/90 hover:bg-[#E63946] text-white rounded-xl transition-colors text-sm font-semibold"
+                  className="flex items-center justify-between w-full py-3 px-4 bg-[#E63946]/90 hover:bg-[#E63946] text-white rounded-2xl transition-colors text-sm font-semibold"
                 >
                   <span>Telefonseelsorge</span>
                   <span className="text-xs">0800 111 0 222</span>
                 </a>
                 <a
                   href="tel:116111"
-                  className="flex items-center justify-between w-full py-3 px-4 bg-[#6B9BD1]/90 hover:bg-[#6B9BD1] text-white rounded-xl transition-colors text-sm font-semibold"
+                  className="flex items-center justify-between w-full py-3 px-4 bg-[#6B9BD1]/90 hover:bg-[#6B9BD1] text-white rounded-2xl transition-colors text-sm font-semibold"
                 >
                   <span>Kinder-/Jugendtelefon</span>
                   <span className="text-xs">116 111</span>
@@ -2396,7 +2383,7 @@ function SOSScreen({ onBack, onHome }: { onBack: () => void; onHome: () => void 
         >
           <button
             onClick={() => setMode('grounding')}
-            className="w-full py-4 px-6 bg-[#8FB89C] text-white hover:bg-[#7da88a] transition-colors rounded-lg font-medium"
+            className="w-full py-4 px-6 bg-[#8FB89C] text-white hover:bg-[#7da88a] transition-colors rounded-3xl font-medium"
           >
             5-4-3-2-1 Technik ausprobieren
           </button>
@@ -2488,7 +2475,7 @@ function FavoritesScreen({
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => onSelectCard(card.id)}
-                  className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-2xl text-left border border-neutral-200"
+                  className="w-full p-6 bg-white/75 backdrop-blur-sm hover:shadow-md active:shadow-sm transition-shadow rounded-3xl text-left border border-neutral-200"
                   style={{ borderLeftWidth: '4px', borderLeftColor: category?.color || '#000' }}
                   aria-label={`Karte ${card.title} öffnen`}
                 >
